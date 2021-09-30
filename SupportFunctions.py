@@ -508,21 +508,16 @@ def influence_matrix_graph(mInfluence, vSectors, nSectors, sTitle, sFigName):
     ### Creating a heatmap plot - continuous values
     ## Creating fig object
     # Determining size based on the number of sectors
-    if nSectors <= 20:
-        tupleFigSize = (11, 11)
-        rotation = 45
-    else:
-        tupleFigSize = (16, 16)
-        rotation = 90
+    tupleFigSize = (11, 11) if nSectors <= 20 else (16, 16)
+    nRotation = 45 if nSectors <= 20 else 90
 
     # Creating fig object
     fig, ax = plt.subplots(figsize=tupleFigSize)
 
     ## Creating heatmap
-    sns.heatmap(mInfluence, cmap="Greys", annot=False,
-                cbar_kws=dict(label="Encadeamento da Relação entre os Setores")
-                )
-    # Modyfing colorbar fontsize
+    sns.heatmap(mInfluence, cmap="Greys", annot=False, cbar_kws=dict(label="Encadeamento da Relação entre os Setores"))
+
+    # Modifying color bar fontsize
     ax.figure.axes[-1].yaxis.label.set_size(13)
 
     # Painting the outside of the plot with the color light blue
@@ -536,15 +531,9 @@ def influence_matrix_graph(mInfluence, vSectors, nSectors, sTitle, sFigName):
     plt.tick_params(axis='x', which='major', labelsize=12)
     plt.tick_params(axis='y', which='major', labelsize=12)
 
-    ax.set_xticks(np.arange(nSectors))
-    plt.xticks(rotation=rotation)
-
-    ax.set_yticks(np.arange(nSectors))
-    plt.yticks(rotation=0)
-
-    # ... and label them with the respective list entries
-    ax.set_xticklabels(vSectors)
-    ax.set_yticklabels(vSectors)
+    # Adjusting ticks and labeling them with the respective list entries
+    plt.xticks(np.arange(nSectors) + 0.5, vSectors, rotation=nRotation)
+    plt.yticks(np.arange(nSectors) + 0.5, vSectors, rotation=0, va="center")
 
     ## Saving the figure
     sFileName = f"Output/Figuras_{nSectors}/" + sFigName + ".pdf"
@@ -556,6 +545,7 @@ def influence_matrix_graph(mInfluence, vSectors, nSectors, sTitle, sFigName):
 
     ## Creating heatmap
     sns.heatmap(situation_Inf, cmap=["#FFFFFF", "#CDCDCD", "#737373", "#000000"], annot=False)
+
     # Creating discrete colorbar
     cbar = ax.collections[0].colorbar
     cbar.set_ticks([0, 1, 2, 3])
@@ -573,15 +563,9 @@ def influence_matrix_graph(mInfluence, vSectors, nSectors, sTitle, sFigName):
     plt.tick_params(axis='x', which='major', labelsize=12)
     plt.tick_params(axis='y', which='major', labelsize=12)
 
-    ax.set_xticks(np.arange(nSectors))
-    plt.xticks(rotation=rotation)
-
-    ax.set_yticks(np.arange(nSectors))
-    plt.yticks(rotation=0)
-
-    # ... and label them with the respective list entries
-    ax.set_xticklabels(vSectors)
-    ax.set_yticklabels(vSectors)
+    # Adjusting ticks and labeling them with the respective list entries
+    plt.xticks(np.arange(nSectors) + 0.5, vSectors, rotation=nRotation)
+    plt.yticks(np.arange(nSectors) + 0.5, vSectors, rotation=0, va="center")
 
     ## Saving the figure
     sFileName = f"Output/Figuras_{nSectors}/" + sFigName + "_Discreto.pdf"
