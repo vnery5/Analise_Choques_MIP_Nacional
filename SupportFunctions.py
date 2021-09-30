@@ -508,8 +508,8 @@ def influence_matrix_graph(mInfluence, vSectors, nSectors, sTitle, sFigName):
     ### Creating a heatmap plot - continuous values
     ## Creating fig object
     # Determining size based on the number of sectors
-    tupleFigSize = (11, 11) if nSectors <= 20 else (16, 16)
-    nRotation = 45 if nSectors <= 20 else 90
+    tupleFigSize = (11, 11) if nSectors <= 20 else (16, 17)
+    nRotation = 45 if nSectors < 20 else 90
 
     # Creating fig object
     fig, ax = plt.subplots(figsize=tupleFigSize)
