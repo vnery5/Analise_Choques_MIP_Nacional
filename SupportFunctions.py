@@ -302,18 +302,18 @@ def read_deflator(nYear, nSectors, EstimaMIP=True):
     return mZ_index, mY_index, mX_index
 
 def bar_plot(vData, vXLabels, sTitle, sXTitle, sFigName, sCaption="",
-             yadjust=0.001, sBarColor="#595959", bAnnotate=True, nDirectory=None):
+             yadjust=0.001, BarColor="#595959", bAnnotate=True, nDirectory=None):
     """
     Creates a styled bar plot containing the data
     :param vData: vector (1D array) containing the data to be plotted
     :param vXLabels: vector containing the x axis labels
     :param sTitle: string containing the title
-    :param sXTitle: string containg the title for the x axis
+    :param sXTitle: string containing the title for the x axis
     :param sCaption: string containing the title. Defaults to nothing
     :param yadjust: float that adjusts the height of the annotations. Defaults to 0.001.
     :param sFigName: desired file name of the saved figure (without the extension).
         The figures are saved in the "Figuras" subdirectory.
-    :param sBarColor: color (string) to fill the bars. Defaults to gray.
+    :param BarColor: color(s) (string or list of length nSectors) to fill the bars. Defaults to gray.
     :param bAnnotate: whether to annotate bars or not. Defaults to True.
     :param nDirectory: which directory to save the figures to;
         defaults to None, which saves according to the length of vXLabels.
@@ -325,20 +325,21 @@ def bar_plot(vData, vXLabels, sTitle, sXTitle, sFigName, sCaption="",
 
     ## Creating fig object
     # Determining size based on the number of sectors
-    if len(vXLabels) == 12:
-        tupleFigSize = (13, 8)
-    elif len(vXLabels) <= 20:
-        tupleFigSize = (18, 8)
-    else:
-        tupleFigSize = (25, 12)
+    tupleFigSize = (18, 8) if len(vXLabels) <= 20 else (25, 12)
 
     # Creating fig object
     fig, ax = plt.subplots(figsize=tupleFigSize)
 
-    # Creating grid and gray bars
-    plt.bar(x=vXLabels, height=vData, color=sBarColor, zorder=3)
+    ## Creating bars with the the respective colours
+    # If a list is supplied, check if it has the same length as number of sectors
+    if (isinstance(BarColor, list) and len(vXLabels) == len(BarColor)) or (isinstance(BarColor, str)):
+        plt.bar(x=vXLabels, height=vData, color=BarColor, zorder=3)
+    else:
+        print("Supplied color list doesn't have the same size as the number of sectors. Painting bars grey.")
+        plt.bar(x=vXLabels, height=vData, color="#595959", zorder=3)
+
+    # Creating grid and painting the outside of the plot with the color light blue
     ax.grid(zorder=0)
-    # Painting the outside of the plot with the color light blue
     fig.set_facecolor("#e6f2ff")
 
     # Setting title and adjusting axis
@@ -371,9 +372,9 @@ def bar_plot(vData, vXLabels, sTitle, sXTitle, sFigName, sCaption="",
     return fig
 
 def named_scatter_plot(x, y, inf_lim, sup_lim, sTitle, vLabels, sXTitle,
-                       sYTitle, sFigName, sCaption="", nTextLimit=0.045):
+                       sYTitle, sFigName, sCaption="", nTextLimit=0.045, PointColor="black"):
     """
-    Creates a styled scatterplot containing the data and labels
+    Creates a styled scatter plot containing the data and labels
     :param x: data for the x axis
     :param y: data for the y axis
     :param inf_lim: inferior limit for both axis
@@ -386,6 +387,7 @@ def named_scatter_plot(x, y, inf_lim, sup_lim, sTitle, vLabels, sXTitle,
     :param sFigName: desired file name of the saved figure (without the extension).
         The figures are saved in the "Figuras" subdirectory.
     :param nTextLimit: minimal distance to origin that a point has to have in order for the sector's name to be plotted
+    :param PointColor: color(s) (string or list of length nSectors) to fill the bars. Defaults to black.
     :return:
         fig: matplotlib object
         Also, saves the plot (in pdf) to the "Figuras" subdirectory.
@@ -395,18 +397,26 @@ def named_scatter_plot(x, y, inf_lim, sup_lim, sTitle, vLabels, sXTitle,
     tupleFigSize = (13, 8)
     fig, ax = plt.subplots(figsize=tupleFigSize)
 
-    # Painting the outside of the plot with the color light blue
+    # Painting the outside of the plot with the color light blue and creating grid lines
     fig.set_facecolor("#e6f2ff")
-
-    # Scatter plot
-    plt.scatter(x, y, c="black", zorder=3)
     plt.grid(zorder=0)
+
+    ## Scatter plot with desired colors
+    # If a list is supplied, check if it has the same length as number of sectors
+    if (isinstance(PointColor, list) and len(vLabels) == len(PointColor)) or (isinstance(PointColor, str)):
+        plt.scatter(x, y, c=PointColor, zorder=3)
+    else:
+        print("Supplied color list doesn't have the same size as the number of sectors. Painting points grey.")
+        plt.scatter(x, y, c="black", zorder=3)
+
     # Setting Limits
     ax.set_xlim(inf_lim, sup_lim)
     ax.set_ylim(inf_lim, sup_lim)
-    # Creating dashed h and vlines at 1
+
+    # Creating dashed horizontal and vertical lines at 1
     plt.hlines(1, xmin=inf_lim, xmax=sup_lim, colors='black', linestyles='dashed')
     plt.vlines(1, ymin=inf_lim, ymax=sup_lim, colors='black', linestyles='dashed')
+
     # Point Labels
     for i, txt in enumerate(vLabels):
         # if the point is too close to the origin, don't annotate
