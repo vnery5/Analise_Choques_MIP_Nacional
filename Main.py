@@ -21,10 +21,10 @@ if __name__ == '__main__':
     # 4: 68 sectors
     # 9: more than 68 sectors ("68+")
     # 0: other (specify number of sectors below)
-    nDimension = 2
+    nDimension = 4
 
     ## Year to be analyzed
-    nYear = 2015
+    nYear = 2018
     
     ## Use MIPs estimated under Guilhoto (2010) or Alves-Passoni, Freitas (APF) (2020)?
     bGuilhoto = True  # True or False
@@ -34,7 +34,7 @@ if __name__ == '__main__':
 
     ## Highlight one sectors? If so, which index and color?
     bHighlightSectorFigs = True  # True or False
-    nIndexHighlightSectorsFigs = 5  # 5: Construction (when using 20 sectors)
+    nIndexHighlightSectorsFigs = 3  # 3: Electricity (when using 20 sectors)
     sHighlightColor = "red"
 
     ## Do a structural decomposition?
@@ -123,9 +123,9 @@ if __name__ == '__main__':
     turning household consumption into an endogenous variable alongside labor remunerations
     """
     ### Calculating Coefficients
-    ## Methodology proposed by VALE, PEROBELLI, 2021
+    ## Methodology proposed by Vale, Perobelli, 2021
     # n = 51 sectors doesn't have the differentiation between EOB and RM (required for Guilhoto's methodology)
-    if not bOpenGuilhoto or nDimension == 2:
+    if not bOpenGuilhoto or nDimension == 3:
         ## Indicator for differentiation when saving spreadsheet
         sOpenGuilhotoIndicator = "_Open_Perobelli"
         print("Open model: Vale and Perobelli")
@@ -402,7 +402,7 @@ if __name__ == '__main__':
 
     if doStructure:
         ## Reading t=1 and t=0 files
-        # Disaggregation/aggregation is not yet supported due to the use of fixed price indexes :/
+        # Disaggregation/aggregation for nSectors other than 12, 20, 51, 68 is not yet supported :/
         # Year 1 (= as the rest of the analysis)
         dfMIP1, nSectors1, vSectors1, mZ1, mY1, mX1, mC1, mV1, mR1, mE1, mSP1, \
             vAVNames1, mAddedValue1, vFDNames1, mFinalDemand1 = \
