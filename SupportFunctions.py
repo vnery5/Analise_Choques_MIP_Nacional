@@ -333,10 +333,10 @@ def bar_plot(vData, vXLabels, sTitle, sXTitle, sFigName,
     ## Creating bars with the the respective colours
     # If a list is supplied, check if it has the same length as number of sectors
     if (isinstance(BarColor, list) and len(vXLabels) == len(BarColor)) or (isinstance(BarColor, str)):
-        plt.bar(x=vXLabels, height=vData, color=BarColor, zorder=4, alpha=0.85)
+        plt.bar(x=vXLabels, height=vData, color=BarColor, zorder=4)
     else:
         print("Supplied color list doesn't have the same size as the number of sectors. Painting bars grey.")
-        plt.bar(x=vXLabels, height=vData, color="#595959", zorder=4, alpha=0.85)
+        plt.bar(x=vXLabels, height=vData, color="#595959", zorder=4)
 
     # Adding average line
     if bMean:

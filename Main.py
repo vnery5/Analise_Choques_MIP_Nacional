@@ -134,7 +134,8 @@ if __name__ == '__main__':
         hR = mR / mX
         hR = hR.T
 
-    ## Methodology proposed by Guilhoto (idea: income = total consumption!)
+    ## Methodology proposed by Guilhoto (
+    # Idea: income = total consumption (usually < in TRUs and MIPs when working with only remuneration)
     else:
         ## Indicator for differentiation when saving spreadsheet
         sOpenGuilhotoIndicator = "_Open_Guilhoto"
