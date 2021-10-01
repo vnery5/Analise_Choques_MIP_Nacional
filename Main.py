@@ -21,7 +21,7 @@ if __name__ == '__main__':
     # 4: 68 sectors
     # 9: more than 68 sectors ("68+")
     # 0: other (specify number of sectors below)
-    nDimension = 4
+    nDimension = 2
 
     ## Year to be analyzed
     nYear = 2018
@@ -618,29 +618,29 @@ if __name__ == '__main__':
         figSimpleEmpMult = Support.bar_plot(
             vData=mEmpMultipliers[:, 1], vXLabels=vSectors_Graph,
             sTitle=f"Multiplicadores Simples de Emprego - {nYear}", sXTitle="Setores", BarColor=lColours,
-            sCaption=f"{sCaption} Nota: por R$ milhão.", sFigName=f"Mults_Simples_Emprego_{nYear}", yadjust=0.1
+            sCaption=f"{sCaption} Nota: por R$ milhão.", sFigName=f"Mults_Simples_Emprego_{nYear}", nY_Adjust=0.1
         )
         figType1EmpMult = Support.bar_plot(
             vData=mEmpMultipliers[:, 2], vXLabels=vSectors_Graph,
             sTitle=f"Multiplicadores de Emprego (Tipo I) - {nYear}", sXTitle="Setores",
-            sCaption=sCaption, sFigName=f"Mult_Tipo1_Emprego_{nYear}", yadjust=0.05, BarColor=lColours
+            sCaption=sCaption, sFigName=f"Mult_Tipo1_Emprego_{nYear}", nY_Adjust=0.05, BarColor=lColours
         )
         figTotEmpMult = Support.bar_plot(
             vData=mEmpMultipliers[:, 3], vXLabels=vSectors_Graph,
             sTitle=f"Multiplicadores Totais de Emprego (Truncados) - {nYear}", sXTitle="Setores", BarColor=lColours,
-            sCaption=f"{sCaption} Nota: por R$ milhão.", sFigName=f"Mult_Totais_Emprego_{nYear}", yadjust=0.1
+            sCaption=f"{sCaption} Nota: por R$ milhão.", sFigName=f"Mult_Totais_Emprego_{nYear}", nY_Adjust=0.1
         )
         figType2EmpMult = Support.bar_plot(
             vData=mEmpMultipliers[:, 4], vXLabels=vSectors_Graph,
             sTitle=f"Multiplicadores de Emprego (Tipo II) - {nYear}", sXTitle="Setores",
-            sCaption=sCaption, sFigName=f"Mult_Tipo2_Emprego_{nYear}", yadjust=0.08, BarColor=lColours
+            sCaption=sCaption, sFigName=f"Mult_Tipo2_Emprego_{nYear}", nY_Adjust=0.08, BarColor=lColours
         )
 
         ## Income multipliers
         figSimpleIncomeMult = Support.bar_plot(
             vData=mIncomeMultipliers[:, 1], vXLabels=vSectors_Graph,
             sTitle=f"Multiplicadores Simples de Renda - {nYear}", sXTitle="Setores",
-            sCaption=sCaption, sFigName=f"Mult_Simples_Renda_{nYear}", yadjust=0.0005, BarColor=lColours
+            sCaption=sCaption, sFigName=f"Mult_Simples_Renda_{nYear}", nY_Adjust=0.0005, BarColor=lColours
         )
         figType1IncomeMult = Support.bar_plot(
             vData=mIncomeMultipliers[:, 2], vXLabels=vSectors_Graph,
@@ -650,12 +650,12 @@ if __name__ == '__main__':
         figTotIncomeMult = Support.bar_plot(
             vData=mIncomeMultipliers[:, 3], vXLabels=vSectors_Graph,
             sTitle=f"Multiplicadores Totais de Renda (Truncados) - {nYear}", sXTitle="Setores",
-            sCaption=sCaption, sFigName=f"Mult_Totais_Renda_{nYear}", yadjust=0.0005, BarColor=lColours
+            sCaption=sCaption, sFigName=f"Mult_Totais_Renda_{nYear}", nY_Adjust=0.0005, BarColor=lColours
         )
         figType2IncomeMult = Support.bar_plot(
             vData=mIncomeMultipliers[:, 4], vXLabels=vSectors_Graph,
             sTitle=f"Multiplicadores de Renda (Tipo II) - {nYear}", sXTitle="Setores",
-            sCaption=sCaption, sFigName=f"Mult_Tipo2_Renda_{nYear}", yadjust=0.002, BarColor=lColours
+            sCaption=sCaption, sFigName=f"Mult_Tipo2_Renda_{nYear}", nY_Adjust=0.002, BarColor=lColours
         )
 
         ## Linkages
@@ -683,15 +683,16 @@ if __name__ == '__main__':
         figExtractionBackwards = Support.bar_plot(
             vData=mExtractions[:, 3], vXLabels=vSectors_Graph,
             sTitle=f"Perda de Produção por Extração Hipótetica - Estrutura de Compras (%) - {nYear}", sXTitle="Setores",
-            sCaption=sCaption, sFigName=f"Extracao_Hipotetica_Compras_{nYear}", yadjust=0.01, BarColor="green"
+            sCaption=sCaption, sFigName=f"Extr_Hipo_Compras_{nYear}", nY_Adjust=0.01, BarColor="green", bMean=False
         )
         # FL % (production loss if the sector doesn't sell anything to the other economic sectors,
         # relative to total economic production)
         figExtractionForwards = Support.bar_plot(
             vData=mExtractions[:, 4], vXLabels=vSectors_Graph,
             sTitle=f"Perda de Produção por Extração Hipótetica - Estrutura de Vendas (%) - {nYear}", sXTitle="Setores",
-            sCaption=sCaption, sFigName=f"Extracao_Hipotetica_Vendas_{nYear}", yadjust=0.01, BarColor="green"
+            sCaption=sCaption, sFigName=f"Extr_Hipo_Vendas_{nYear}", nY_Adjust=0.01, BarColor="green", bMean=False
         )
+
         ## Influence matrix
         figInfluenceCont, figInfluenceDisc = \
             Support.influence_matrix_graph(mInfluence, vSectors_Graph, nSectors,
@@ -704,19 +705,19 @@ if __name__ == '__main__':
                 vData=mDecomposition[:nSectors1, 1], vXLabels=vSectors_Graph1,
                 sTitle=f"Variação da Produção {nYear_Decomp} - {nYear} (R$ Milhões 2010)",
                 sXTitle="Setores", sCaption=sCaption_Decomp, sFigName=f"Var_Prod_{nYear_Decomp}-{nYear}",
-                BarColor="darkblue", bAnnotate=False, nDirectory=nSectors
+                BarColor="darkblue", bAnnotate=False, nDirectory=nSectors, bMean=False
             )
             figDeltaTech = Support.bar_plot(
                 vData=mDecomposition[:nSectors1, 2], vXLabels=vSectors_Graph1,
                 sTitle=f"Decomposição - Variação Tecnológica {nYear_Decomp} - {nYear}",
                 sXTitle="Setores", sCaption=sCaption_Decomp, sFigName=f"Var_Tecno_{nYear_Decomp}-{nYear}",
-                BarColor="darkred", bAnnotate=False, nDirectory=nSectors
+                BarColor="darkred", bAnnotate=False, nDirectory=nSectors, bMean=False
             )
             figDeltaDemand = Support.bar_plot(
                 vData=mDecomposition[:nSectors1, 3], vXLabels=vSectors_Graph1,
                 sTitle=f"Decomposição - Variação da Demanda Final {nYear_Decomp} - {nYear}",
                 sXTitle="Setores", sCaption=sCaption_Decomp, sFigName=f"Var_DemFinal_{nYear_Decomp}-{nYear}",
-                BarColor="dodgerblue", bAnnotate=False, nDirectory=nSectors
+                BarColor="dodgerblue", bAnnotate=False, nDirectory=nSectors, bMean=False
             )
 
     ### ============================================================================================

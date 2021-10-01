@@ -302,7 +302,7 @@ def read_deflator(nYear, nSectors, EstimaMIP=True):
     return mZ_index, mY_index, mX_index
 
 def bar_plot(vData, vXLabels, sTitle, sXTitle, sFigName, sCaption="",
-             yadjust=0.001, BarColor="#595959", bAnnotate=True, nDirectory=None):
+             nY_Adjust=0.001, BarColor="#595959", bMean=False, bAnnotate=True, nDirectory=None):
     """
     Creates a styled bar plot containing the data
     :param vData: vector (1D array) containing the data to be plotted
@@ -310,10 +310,11 @@ def bar_plot(vData, vXLabels, sTitle, sXTitle, sFigName, sCaption="",
     :param sTitle: string containing the title
     :param sXTitle: string containing the title for the x axis
     :param sCaption: string containing the title. Defaults to nothing
-    :param yadjust: float that adjusts the height of the annotations. Defaults to 0.001.
+    :param nY_Adjust: float that adjusts the height of the annotations. Defaults to 0.001.
     :param sFigName: desired file name of the saved figure (without the extension).
         The figures are saved in the "Figuras" subdirectory.
     :param BarColor: color(s) (string or list of length nSectors) to fill the bars. Defaults to gray.
+    :param bMean: boolean; plot a line of the economy's average? Defaults to False.
     :param bAnnotate: whether to annotate bars or not. Defaults to True.
     :param nDirectory: which directory to save the figures to;
         defaults to None, which saves according to the length of vXLabels.
@@ -333,10 +334,14 @@ def bar_plot(vData, vXLabels, sTitle, sXTitle, sFigName, sCaption="",
     ## Creating bars with the the respective colours
     # If a list is supplied, check if it has the same length as number of sectors
     if (isinstance(BarColor, list) and len(vXLabels) == len(BarColor)) or (isinstance(BarColor, str)):
-        plt.bar(x=vXLabels, height=vData, color=BarColor, zorder=3)
+        plt.bar(x=vXLabels, height=vData, color=BarColor, zorder=4, alpha=0.85)
     else:
         print("Supplied color list doesn't have the same size as the number of sectors. Painting bars grey.")
-        plt.bar(x=vXLabels, height=vData, color="#595959", zorder=3)
+        plt.bar(x=vXLabels, height=vData, color="#595959", zorder=4, alpha=0.85)
+
+    # Adding average line
+    if bMean:
+        ax.axhline(vData.mean(), color="green", linewidth=4, linestyle="--")
 
     # Creating grid and painting the outside of the plot with the color light blue
     ax.grid(zorder=0)
@@ -357,18 +362,17 @@ def bar_plot(vData, vXLabels, sTitle, sXTitle, sFigName, sCaption="",
         for patch, label in zip(ax.patches, vData):
             height = patch.get_height()
             ax.text(
-                patch.get_x() + patch.get_width() / 2, height + yadjust,
+                patch.get_x() + patch.get_width() / 2, height + nY_Adjust,
                 np.around(label, 2), ha="center", va="bottom", fontsize=12
             )
 
-    # fig.tight_layout()
     ## Saving the figure
     if nDirectory is None:
         sFileName = f"Output/Figuras_{len(vXLabels)}/" + sFigName + ".pdf"
     else:
         sFileName = f"Output/Figuras_{nDirectory}/" + sFigName + ".pdf"
-    fig.savefig(sFileName, dpi=1200)
 
+    fig.savefig(sFileName, dpi=1200)
     return fig
 
 def named_scatter_plot(x, y, inf_lim, sup_lim, sTitle, vLabels, sXTitle,
@@ -435,28 +439,17 @@ def named_scatter_plot(x, y, inf_lim, sup_lim, sTitle, vLabels, sXTitle,
                 wrap=True, horizontalalignment='left', fontsize=12)
 
     ## Annotating Quadrants
+    plt.figtext(0.13, 0.85, "Forte encadeamento para trás", wrap=True, horizontalalignment='left', fontsize=11)
+    plt.figtext(0.825, 0.85, "Setor-Chave", wrap=True, horizontalalignment='left', fontsize=11)
+    plt.figtext(0.70, 0.12, "Forte encadeamento para frente", wrap=True, horizontalalignment='left', fontsize=11)
+
     # For 12 sectors
     if len(vLabels) < 20:
-        plt.figtext(0.13, 0.85, "Forte encadeamento para trás",
-                    wrap=True, horizontalalignment='left', fontsize=11)
-        plt.figtext(0.13, 0.12, "Fraco encadeamento",
-                    wrap=True, horizontalalignment='left', fontsize=11)
-        plt.figtext(0.825, 0.85, "Setor-Chave",
-                    wrap=True, horizontalalignment='left', fontsize=11)
-        plt.figtext(0.70, 0.12, "Forte encadeamento para frente",
-                    wrap=True, horizontalalignment='left', fontsize=11)
-    else:  # for 20+ sectors
-        plt.figtext(0.13, 0.85, "Forte encadeamento para trás",
-                    wrap=True, horizontalalignment='left', fontsize=11)
-        plt.figtext(0.825, 0.85, "Setor-Chave",
-                    wrap=True, horizontalalignment='left', fontsize=11)
-        plt.figtext(0.70, 0.12, "Forte encadeamento para frente",
-                    wrap=True, horizontalalignment='left', fontsize=11)
+        plt.figtext(0.13, 0.12, "Fraco encadeamento", wrap=True, horizontalalignment='left', fontsize=11)
 
     # Saving graph
     sFileName = f"Output/Figuras_{len(vLabels)}/" + sFigName + ".pdf"
     fig.savefig(sFileName, dpi=1200)
-    # fig.show()
 
     return fig
 
