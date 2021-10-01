@@ -318,9 +318,7 @@ def bar_plot(vData, vXLabels, sTitle, sXTitle, sFigName,
     :param nDirectory: which directory to save the figures to;
         defaults to None, which saves according to the length of vXLabels.
         Very specific to the case of aggregation and structural decomposition
-    :return:
-        fig: matplotlib object
-        Also, saves the plot (in pdf) to the "Figuras" subdirectory in 'Output'.
+    :return: Nothing; saves the plot (in pdf) to the "Figuras" subdirectory in 'Output'.
     """
 
     ## Creating fig object
@@ -362,13 +360,15 @@ def bar_plot(vData, vXLabels, sTitle, sXTitle, sFigName,
             )
 
     ## Saving the figure
+    # File name and extension (pdf)
     if nDirectory is None:
         sFileName = f"Output/Figuras_{len(vXLabels)}/" + sFigName + ".pdf"
     else:
         sFileName = f"Output/Figuras_{nDirectory}/" + sFigName + ".pdf"
 
+    # Saving figure and closing it to avoid memory issues (matplotlib allows only 20 open figures)
     fig.savefig(sFileName, dpi=600, bbox_inches="tight")
-    return fig
+    plt.close(fig)
 
 def named_scatter_plot(x, y, inf_lim, sup_lim, sTitle, vLabels, sXTitle,
                        sYTitle, sFigName, nTextLimit=0.045, PointColor="black"):
@@ -386,9 +386,7 @@ def named_scatter_plot(x, y, inf_lim, sup_lim, sTitle, vLabels, sXTitle,
         The figures are saved in the "Figuras" subdirectory.
     :param nTextLimit: minimal distance to origin that a point has to have in order for the sector's name to be plotted
     :param PointColor: color(s) (string or list of length nSectors) to fill the bars. Defaults to black.
-    :return:
-        fig: matplotlib object
-        Also, saves the plot (in pdf) to the "Figuras" subdirectory.
+    :return: Nothing; saves the plot (in pdf) to the "Figuras" subdirectory.
     """
 
     ## Creating fig object
@@ -441,8 +439,6 @@ def named_scatter_plot(x, y, inf_lim, sup_lim, sTitle, vLabels, sXTitle,
     sFileName = f"Output/Figuras_{len(vLabels)}/" + sFigName + ".pdf"
     fig.savefig(sFileName, dpi=600, bbox_inches="tight")
 
-    return fig
-
 def influence_matrix_graph(mInfluence, vSectors, nSectors, sTitle, sFigName):
     """
     Graphs the influence matrix: the darker the color, the larger the importance of the link
@@ -454,9 +450,7 @@ def influence_matrix_graph(mInfluence, vSectors, nSectors, sTitle, sFigName):
     :param nSectors: number of sectors
     :param sTitle: title of the figure
     :param sFigName: name of the file
-    :return:
-        fig: figure containing the influence matrix
-        fig_disc: figure containing the discrete influence matrix
+    :return: Nothing; saves influence matrix in the 'Output' directory
     """
 
     ## Replacing new lines with spaces
@@ -553,8 +547,6 @@ def influence_matrix_graph(mInfluence, vSectors, nSectors, sTitle, sFigName):
     ## Saving the figure
     sFileName = f"Output/Figuras_{nSectors}/" + sFigName + "_Discreto.pdf"
     fig_disc.savefig(sFileName, dpi=600, bbox_inches="tight")
-
-    return fig, fig_disc
 
 ### ============================================================================================
 
@@ -689,15 +681,17 @@ def calc_multipliers(vInput, vProduction, mDirectCoef, mLeontief_open, mLeontief
         mMultipliers: matrix containing the multiplier by sector
     """
 
-    ## Coefficients: how much of income/labor is necessary in order to produce 1 unit in each sector
+    ## Coefficients: how much of income/labor/taxes is necessary in order to produce 1 unit in each sector
     h = vInput / vProduction
+
     # Reshaping (from 1D matrix to vector)
     h = np.reshape(h, -1)
+
     # Diagonal matrix ("h_hat")
     h_diag = np.diagflat(h)
 
     # Employment/Income generator matrix (open model): given an increase of 1 in final demand of that sector,
-    # how much labor/income is generated in the economy?
+    # how much labor/income/taxes is generated in the economy?
     G = h_diag.dot(mLeontief_open)
 
     # Employment/Income generator matrix (closed model): includes inducing effects of consumption and income expansion
@@ -705,13 +699,19 @@ def calc_multipliers(vInput, vProduction, mDirectCoef, mLeontief_open, mLeontief
 
     ## Simple multipliers
     M = np.sum(G, axis=0)
-    ## Type I multipliers
-    MI = M / h
 
-    ## Total (truncated) labor/income multipliers
+    ## Type I multipliers
+    MI = np.zeros(nSectors)
+    for nCoefficient in range(h.size):
+        MI[nCoefficient] = M[nCoefficient] / h[nCoefficient] if h[nCoefficient] != 0 else 0
+
+    ## Total (truncated) multipliers
     MT = np.sum(G_closed, axis=0)
-    ## Type II labor multipliers
-    MII = MT / h
+
+    ## Type II multipliers
+    MII = np.zeros(nSectors)
+    for nCoefficient in range(h.size):
+        MII[nCoefficient] = MT[nCoefficient] / h[nCoefficient] if h[nCoefficient] != 0 else 0
 
     ## Separating multipliers into direct, indirect and induced effects (for simple and total multipliers)
     DirectEffects = np.sum(h_diag.dot(mDirectCoef), axis=0)
