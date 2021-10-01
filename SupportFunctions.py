@@ -221,7 +221,7 @@ def abbreviate_sectors_names(vSectors):
         elif name.startswith("Informação"):
             new_name = "Info."
         elif name.startswith("Atividades financeiras"):
-            new_name = "Finanças"
+            new_name = "Fin."
         elif name.startswith("Atividades imobiliárias"):
             new_name = "Imob."
         elif name.startswith("Atividades científicas"):
@@ -301,7 +301,7 @@ def read_deflator(nYear, nSectors, EstimaMIP=True):
 
     return mZ_index, mY_index, mX_index
 
-def bar_plot(vData, vXLabels, sTitle, sXTitle, sFigName, sCaption="",
+def bar_plot(vData, vXLabels, sTitle, sXTitle, sFigName,
              nY_Adjust=0.001, BarColor="#595959", bMean=False, bAnnotate=True, nDirectory=None):
     """
     Creates a styled bar plot containing the data
@@ -309,7 +309,6 @@ def bar_plot(vData, vXLabels, sTitle, sXTitle, sFigName, sCaption="",
     :param vXLabels: vector containing the x axis labels
     :param sTitle: string containing the title
     :param sXTitle: string containing the title for the x axis
-    :param sCaption: string containing the title. Defaults to nothing
     :param nY_Adjust: float that adjusts the height of the annotations. Defaults to 0.001.
     :param sFigName: desired file name of the saved figure (without the extension).
         The figures are saved in the "Figuras" subdirectory.
@@ -326,7 +325,7 @@ def bar_plot(vData, vXLabels, sTitle, sXTitle, sFigName, sCaption="",
 
     ## Creating fig object
     # Determining size based on the number of sectors
-    tupleFigSize = (18, 8) if len(vXLabels) <= 20 else (25, 12)
+    tupleFigSize = (8, 4) if len(vXLabels) <= 20 else (12, 6)
 
     # Creating fig object
     fig, ax = plt.subplots(figsize=tupleFigSize)
@@ -348,14 +347,10 @@ def bar_plot(vData, vXLabels, sTitle, sXTitle, sFigName, sCaption="",
     fig.set_facecolor("#e6f2ff")
 
     # Setting title and adjusting axis
-    ax.set_title(sTitle, fontsize=18)
-    ax.set_xlabel(sXTitle, fontsize=13)
-    plt.tick_params(axis='x', which='major', labelsize=12)
-    plt.tick_params(axis='y', which='major', labelsize=12)
-
-    # Creating caption
-    plt.figtext(0.125, 0.005, sCaption,
-                wrap=True, horizontalalignment='left', fontsize=12)
+    ax.set_title(sTitle, fontsize=12)
+    ax.set_xlabel(sXTitle, fontsize=10)
+    plt.tick_params(axis='x', which='major', labelsize=6)
+    plt.tick_params(axis='y', which='major', labelsize=6)
 
     # Annotating the bars (if requested)
     if bAnnotate:
@@ -363,7 +358,7 @@ def bar_plot(vData, vXLabels, sTitle, sXTitle, sFigName, sCaption="",
             height = patch.get_height()
             ax.text(
                 patch.get_x() + patch.get_width() / 2, height + nY_Adjust,
-                np.around(label, 2), ha="center", va="bottom", fontsize=12
+                np.around(label, 2), ha="center", va="bottom", fontsize=6
             )
 
     ## Saving the figure
@@ -372,11 +367,11 @@ def bar_plot(vData, vXLabels, sTitle, sXTitle, sFigName, sCaption="",
     else:
         sFileName = f"Output/Figuras_{nDirectory}/" + sFigName + ".pdf"
 
-    fig.savefig(sFileName, dpi=1200)
+    fig.savefig(sFileName, dpi=600, bbox_inches="tight")
     return fig
 
 def named_scatter_plot(x, y, inf_lim, sup_lim, sTitle, vLabels, sXTitle,
-                       sYTitle, sFigName, sCaption="", nTextLimit=0.045, PointColor="black"):
+                       sYTitle, sFigName, nTextLimit=0.045, PointColor="black"):
     """
     Creates a styled scatter plot containing the data and labels
     :param x: data for the x axis
@@ -387,7 +382,6 @@ def named_scatter_plot(x, y, inf_lim, sup_lim, sTitle, vLabels, sXTitle,
     :param vLabels: vector containing the point labels
     :param sXTitle: string containing the title for the x axis
     :param sYTitle: string containing the title for the y axis
-    :param sCaption: string containing the title. Defaults to nothing
     :param sFigName: desired file name of the saved figure (without the extension).
         The figures are saved in the "Figuras" subdirectory.
     :param nTextLimit: minimal distance to origin that a point has to have in order for the sector's name to be plotted
@@ -398,7 +392,7 @@ def named_scatter_plot(x, y, inf_lim, sup_lim, sTitle, vLabels, sXTitle,
     """
 
     ## Creating fig object
-    tupleFigSize = (13, 8)
+    tupleFigSize = (8, 8)
     fig, ax = plt.subplots(figsize=tupleFigSize)
 
     # Painting the outside of the plot with the color light blue and creating grid lines
@@ -430,18 +424,14 @@ def named_scatter_plot(x, y, inf_lim, sup_lim, sTitle, vLabels, sXTitle,
             ax.annotate(txt, (x[i] + 0.012, y[i] - 0.012))
 
     # Titles and Captions
-    ax.set_title(sTitle, fontsize=18)
-    ax.set_xlabel(sXTitle, fontsize=13)
-    ax.set_ylabel(sYTitle, fontsize=13)
-
-    # Creating caption
-    plt.figtext(0.125, 0.005, sCaption,
-                wrap=True, horizontalalignment='left', fontsize=12)
+    ax.set_title(sTitle, fontsize=12)
+    ax.set_xlabel(sXTitle, fontsize=10)
+    ax.set_ylabel(sYTitle, fontsize=10)
 
     ## Annotating Quadrants
     plt.figtext(0.13, 0.85, "Forte encadeamento para trás", wrap=True, horizontalalignment='left', fontsize=11)
-    plt.figtext(0.825, 0.85, "Setor-Chave", wrap=True, horizontalalignment='left', fontsize=11)
-    plt.figtext(0.70, 0.12, "Forte encadeamento para frente", wrap=True, horizontalalignment='left', fontsize=11)
+    plt.figtext(0.78, 0.85, "Setor-Chave", wrap=True, horizontalalignment='left', fontsize=11)
+    plt.figtext(0.58, 0.12, "Forte encadeamento para frente", wrap=True, horizontalalignment='left', fontsize=11)
 
     # For 12 sectors
     if len(vLabels) < 20:
@@ -449,7 +439,7 @@ def named_scatter_plot(x, y, inf_lim, sup_lim, sTitle, vLabels, sXTitle,
 
     # Saving graph
     sFileName = f"Output/Figuras_{len(vLabels)}/" + sFigName + ".pdf"
-    fig.savefig(sFileName, dpi=1200)
+    fig.savefig(sFileName, dpi=600, bbox_inches="tight")
 
     return fig
 
@@ -501,7 +491,7 @@ def influence_matrix_graph(mInfluence, vSectors, nSectors, sTitle, sFigName):
     ### Creating a heatmap plot - continuous values
     ## Creating fig object
     # Determining size based on the number of sectors
-    tupleFigSize = (11, 11) if nSectors <= 20 else (16, 17)
+    tupleFigSize = (6, 6) if nSectors <= 20 else (10, 10)
     nRotation = 45 if nSectors < 20 else 90
 
     # Creating fig object
@@ -511,18 +501,18 @@ def influence_matrix_graph(mInfluence, vSectors, nSectors, sTitle, sFigName):
     sns.heatmap(mInfluence, cmap="Greys", annot=False, cbar_kws=dict(label="Encadeamento da Relação entre os Setores"))
 
     # Modifying color bar fontsize
-    ax.figure.axes[-1].yaxis.label.set_size(13)
+    ax.figure.axes[-1].yaxis.label.set_size(8)
 
     # Painting the outside of the plot with the color light blue
     fig.set_facecolor("#e6f2ff")
 
     # Setting title
-    ax.set_title(sTitle, fontsize=18)
-    ax.set_xlabel("Setores", fontsize=13)
+    ax.set_title(sTitle, fontsize=12)
+    ax.set_xlabel("Setores", fontsize=10)
 
     # Adjusting axis
-    plt.tick_params(axis='x', which='major', labelsize=12)
-    plt.tick_params(axis='y', which='major', labelsize=12)
+    plt.tick_params(axis='x', which='major', labelsize=6)
+    plt.tick_params(axis='y', which='major', labelsize=6)
 
     # Adjusting ticks and labeling them with the respective list entries
     plt.xticks(np.arange(nSectors) + 0.5, vSectors, rotation=nRotation)
@@ -530,7 +520,7 @@ def influence_matrix_graph(mInfluence, vSectors, nSectors, sTitle, sFigName):
 
     ## Saving the figure
     sFileName = f"Output/Figuras_{nSectors}/" + sFigName + ".pdf"
-    fig.savefig(sFileName, dpi=1200)
+    fig.savefig(sFileName, dpi=600, bbox_inches="tight")
 
     ### Creating a heatmap plot - continuous values
     # Creating fig_disc object
@@ -543,18 +533,18 @@ def influence_matrix_graph(mInfluence, vSectors, nSectors, sTitle, sFigName):
     cbar = ax.collections[0].colorbar
     cbar.set_ticks([0, 1, 2, 3])
     cbar.set_ticklabels(labels)
-    cbar.ax.tick_params(labelsize=12)
+    cbar.ax.tick_params(labelsize=8)
 
     # Painting the outside of the plot with the color light blue
     fig_disc.set_facecolor("#e6f2ff")
 
     # Setting title
-    ax.set_title(sTitle, fontsize=18)
-    ax.set_xlabel("Setores", fontsize=13)
+    ax.set_title(sTitle, fontsize=12)
+    ax.set_xlabel("Setores", fontsize=10)
 
     # Adjusting axis
-    plt.tick_params(axis='x', which='major', labelsize=12)
-    plt.tick_params(axis='y', which='major', labelsize=12)
+    plt.tick_params(axis='x', which='major', labelsize=6)
+    plt.tick_params(axis='y', which='major', labelsize=6)
 
     # Adjusting ticks and labeling them with the respective list entries
     plt.xticks(np.arange(nSectors) + 0.5, vSectors, rotation=nRotation)
@@ -562,7 +552,7 @@ def influence_matrix_graph(mInfluence, vSectors, nSectors, sTitle, sFigName):
 
     ## Saving the figure
     sFileName = f"Output/Figuras_{nSectors}/" + sFigName + "_Discreto.pdf"
-    fig_disc.savefig(sFileName, dpi=1200)
+    fig_disc.savefig(sFileName, dpi=600, bbox_inches="tight")
 
     return fig, fig_disc
 
@@ -1072,11 +1062,8 @@ def write_data_excel(sDirectory, sFileName, vSheetName, vDataSheet):
         ## Append to list
         lDataFrames.append(vDataSheet[nSheet])
 
-        ## Determining float format
-        sFloatFormat = "%.6f"
-
         ## Writing to Excel
-        lDataFrames[nSheet].to_excel(Writer, vSheetName[nSheet], header=True, index=True, float_format=sFloatFormat)
+        lDataFrames[nSheet].to_excel(Writer, vSheetName[nSheet], header=True, index=True, freeze_panes=(1, 1))
 
     ## Saving file
     Writer.save()
