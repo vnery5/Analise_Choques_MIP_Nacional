@@ -228,7 +228,7 @@ if __name__ == '__main__':
     """
     ### ============================================================================================
 
-    ## Creating array with all multipliers
+    ## Creating array with all multiplier names
     mEmpMultipliers_Col_Names = [
         "Setor", "Coeficiente", "Multiplicador Simples de Emprego", "Multiplicador de Emprego Tipo I",
         "Multiplicador Total de Emprego (truncado)", "Multiplicador de Emprego Tipo II",
@@ -241,7 +241,7 @@ if __name__ == '__main__':
     ### Income Multipliers: Same interpretation as that of labor multipliers
     ### ============================================================================================
 
-    ## Creating array with all multipliers
+    ## Creating array with all multiplier names
     mIncomeMultipliers_Col_Names = [
         "Setor", "Coeficiente", "Multiplicador Simples de Renda", "Multiplicador de Renda Tipo I",
         "Multiplicador Total de Renda (truncado)", "Multiplicador de Renda Tipo II",
@@ -251,7 +251,25 @@ if __name__ == '__main__':
     mIncomeMultipliers = Support.calc_multipliers(mR, mX, mA, mB, mB_closed, vSectors, nSectors)
 
     ### ============================================================================================
-    ### Índices de Ligação (Hirschman-Rasmussen - HR) e Coeficientes de Variação
+    ### Taxes Multipliers: Same interpretation as above and considering only sectorial taxes
+    ### (not including any final demand components present in mSP_FD)
+    ### ============================================================================================
+
+    ## Creating array with all multiplier names
+    mTaxesMultipliers_Col_Names = [
+        "Setor", "Coeficiente", "Multiplicador Simples de Impostos", "Multiplicador de Impostos Tipo I",
+        "Multiplicador Total de Impostos (truncado)", "Multiplicador de Impostos Tipo II",
+        "Efeito Direto", "Efeito Indireto", "Efeito Induzido"
+    ]
+
+    ## "Vector" (nSectors x 1 matrix) containing all taxes paid by sectors
+    mTaxes = np.sum(mSP[1:5, :], axis=0, keepdims=True).T
+
+    ## Creating table with all multipliers
+    mTaxesMultipliers = Support.calc_multipliers(mTaxes, mX, mA, mB, mB_closed, vSectors, nSectors)
+
+    ### ============================================================================================
+    ### Linkages (Hirschman-Rasmussen - HR) and Variance Coefficients
     """
     The indices show which sectors have larger chaining impacts in the economic, not only buying from other
     sectors in order to meet rises in its final demand ("backwards"/dispersion power - 
@@ -311,7 +329,7 @@ if __name__ == '__main__':
     mVarCoef_Col_Names = ["Setor", "CVi", "CVj"]
     mVarCoef = np.vstack((vSectors, CVi, CVj)).T
 
-    ### Índices Puros de Ligação (GHS or, in portuguese, IPL)
+    ### Pure Linkages (GHS or, in portuguese, IPL)
     """
     As pointed out by Guilhoto (2009), the traditional indexes don't take into consideration
     the production levels of each sector. The "pure" or "generalized" version doesn't have this problem.
@@ -336,7 +354,7 @@ if __name__ == '__main__':
     mIndPureLigNorm = dfIndPureLigNorm.to_numpy()
 
     ### ======================================================================================
-    ### Campo de Influência
+    ### Influence Matrices
     """
     For more information, see Vale, Perobelli, 2020, p.98
     Although the indexes above show the importance of each sector in the economy as whole, it is difficult
@@ -497,14 +515,20 @@ if __name__ == '__main__':
     vNameSheets.append("Mult_Prod")
     vDataSheets.append(pd.DataFrame(mProdMultipliers[:, 1:], columns=mProdMultipliers_Col_Names[1:], index=vSectors))
 
-    # Employment/Labor multipliers
+    # Employment/Labor Multipliers
     vNameSheets.append("Mult_Trab")
     vDataSheets.append(pd.DataFrame(mEmpMultipliers[:, 1:], columns=mEmpMultipliers_Col_Names[1:], index=vSectors))
 
-    # Income multipliers
+    # Income Multipliers
     vNameSheets.append("Mult_Renda")
     vDataSheets.append(
         pd.DataFrame(mIncomeMultipliers[:, 1:], columns=mIncomeMultipliers_Col_Names[1:], index=vSectors)
+    )
+
+    # Taxes Multipliers
+    vNameSheets.append("Mult_Imp")
+    vDataSheets.append(
+        pd.DataFrame(mTaxesMultipliers[:, 1:], columns=mTaxesMultipliers_Col_Names[1:], index=vSectors)
     )
 
     # Variance Coefficients
@@ -595,69 +619,91 @@ if __name__ == '__main__':
         print(f"Creating figures... ({datetime.datetime.now()})")
 
         ## Production Multipliers
-        figSimpleProdMult = Support.bar_plot(
+        Support.bar_plot(
             vData=mProdMultipliers[:, 1], vXLabels=vSectors_Graph,
             sTitle=f"Multiplicadores Simples de Produção - {nYear}", sXTitle="Setores",
-            sFigName=f"Mult_Simples_Producao_{nYear}", BarColor=lColours
+            sFigName=f"Mult_Prod_Simples_{nYear}", BarColor=lColours
         )
-        figTotalProdMult = Support.bar_plot(
+        Support.bar_plot(
             vData=mProdMultipliers[:, 2], vXLabels=vSectors_Graph,
             sTitle=f"Multiplicadores Totais de Produção - {nYear}", sXTitle="Setores",
-            sFigName=f"Mult_Totais_Producao_{nYear}", BarColor=lColours
+            sFigName=f"Mult_Prod_Totais_{nYear}", BarColor=lColours
         )
-        figTotalTruncMult = Support.bar_plot(
+        Support.bar_plot(
             vData=mProdMultipliers[:, 3], vXLabels=vSectors_Graph,
             sTitle=f"Multiplicadores Totais de Produção Truncados - {nYear}", sXTitle="Setores",
-            sFigName=f"Mult_Tot_Prod_Trunc_{nYear}", BarColor=lColours
+            sFigName=f"Mult_Prod_TotTrunc_{nYear}", BarColor=lColours
         )
 
         ## Employment Multipliers
-        figSimpleEmpMult = Support.bar_plot(
+        Support.bar_plot(
             vData=mEmpMultipliers[:, 1], vXLabels=vSectors_Graph,
             sTitle=f"Multiplicadores Simples de Emprego - {nYear}", sXTitle="Setores", BarColor=lColours,
-            sFigName=f"Mults_Simples_Emprego_{nYear}", nY_Adjust=0.1
+            sFigName=f"Mult_Emp_Simples_{nYear}", nY_Adjust=0.1
         )
-        figType1EmpMult = Support.bar_plot(
+        Support.bar_plot(
             vData=mEmpMultipliers[:, 2], vXLabels=vSectors_Graph,
             sTitle=f"Multiplicadores de Emprego (Tipo I) - {nYear}", sXTitle="Setores",
-            sFigName=f"Mult_Tipo1_Emprego_{nYear}", nY_Adjust=0.05, BarColor=lColours
+            sFigName=f"Mult_Emp_Tipo1_{nYear}", nY_Adjust=0.05, BarColor=lColours
         )
-        figTotEmpMult = Support.bar_plot(
+        Support.bar_plot(
             vData=mEmpMultipliers[:, 3], vXLabels=vSectors_Graph,
             sTitle=f"Multiplicadores Totais de Emprego (Truncados) - {nYear}", sXTitle="Setores", BarColor=lColours,
-            sFigName=f"Mult_Totais_Emprego_{nYear}", nY_Adjust=0.1
+            sFigName=f"Mult_Emp_Tot_{nYear}", nY_Adjust=0.1
         )
-        figType2EmpMult = Support.bar_plot(
+        Support.bar_plot(
             vData=mEmpMultipliers[:, 4], vXLabels=vSectors_Graph,
             sTitle=f"Multiplicadores de Emprego (Tipo II) - {nYear}", sXTitle="Setores",
-            sFigName=f"Mult_Tipo2_Emprego_{nYear}", nY_Adjust=0.08, BarColor=lColours
+            sFigName=f"Mult_Emp_Tipo2_{nYear}", nY_Adjust=0.08, BarColor=lColours
         )
 
-        ## Income multipliers
-        figSimpleIncomeMult = Support.bar_plot(
+        ## Income Multipliers
+        Support.bar_plot(
             vData=mIncomeMultipliers[:, 1], vXLabels=vSectors_Graph,
             sTitle=f"Multiplicadores Simples de Renda - {nYear}", sXTitle="Setores",
-            sFigName=f"Mult_Simples_Renda_{nYear}", nY_Adjust=0.0005, BarColor=lColours
+            sFigName=f"Mult_Renda_Simples_{nYear}", nY_Adjust=0.0005, BarColor=lColours
         )
-        figType1IncomeMult = Support.bar_plot(
+        Support.bar_plot(
             vData=mIncomeMultipliers[:, 2], vXLabels=vSectors_Graph,
             sTitle=f"Multiplicadores de Renda (Tipo I) - {nYear}", sXTitle="Setores",
-            sFigName=f"Mult_Tipo1_Renda_{nYear}", BarColor=lColours
+            sFigName=f"Mult_Renda_Tipo1_{nYear}", BarColor=lColours
         )
-        figTotIncomeMult = Support.bar_plot(
+        Support.bar_plot(
             vData=mIncomeMultipliers[:, 3], vXLabels=vSectors_Graph,
             sTitle=f"Multiplicadores Totais de Renda (Truncados) - {nYear}", sXTitle="Setores",
-            sFigName=f"Mult_Totais_Renda_{nYear}", nY_Adjust=0.0005, BarColor=lColours
+            sFigName=f"Mult_Renda_Tot_{nYear}", nY_Adjust=0.0005, BarColor=lColours
         )
-        figType2IncomeMult = Support.bar_plot(
+        Support.bar_plot(
             vData=mIncomeMultipliers[:, 4], vXLabels=vSectors_Graph,
             sTitle=f"Multiplicadores de Renda (Tipo II) - {nYear}", sXTitle="Setores",
-            sFigName=f"Mult_Tipo2_Renda_{nYear}", nY_Adjust=0.002, BarColor=lColours
+            sFigName=f"Mult_Renda_Tipo2_{nYear}", nY_Adjust=0.002, BarColor=lColours
+        )
+
+        ## Taxes Multipliers
+        Support.bar_plot(
+            vData=mTaxesMultipliers[:, 1], vXLabels=vSectors_Graph,
+            sTitle=f"Multiplicadores Simples de Impostos - {nYear}", sXTitle="Setores",
+            sFigName=f"Mult_Imp_Simples_{nYear}", nY_Adjust=0.0005, BarColor=lColours
+        )
+        Support.bar_plot(
+            vData=mTaxesMultipliers[:, 2], vXLabels=vSectors_Graph,
+            sTitle=f"Multiplicadores de Impostos (Tipo I) - {nYear}", sXTitle="Setores",
+            sFigName=f"Mult_Imp_Tipo1_{nYear}", BarColor=lColours
+        )
+        Support.bar_plot(
+            vData=mTaxesMultipliers[:, 3], vXLabels=vSectors_Graph,
+            sTitle=f"Multiplicadores Totais de Impostos (Truncados) - {nYear}", sXTitle="Setores",
+            sFigName=f"Mult_Imp_Tot_{nYear}", nY_Adjust=0.0005, BarColor=lColours
+        )
+        Support.bar_plot(
+            vData=mTaxesMultipliers[:, 4], vXLabels=vSectors_Graph,
+            sTitle=f"Multiplicadores de Impostos (Tipo II) - {nYear}", sXTitle="Setores",
+            sFigName=f"Mult_Imp_Tipo2_{nYear}", nY_Adjust=0.002, BarColor=lColours
         )
 
         ## Linkages
         # Traditional (HR)
-        figIndLig = Support.named_scatter_plot(
+        Support.named_scatter_plot(
             x=mIndLig[:, 3], y=mIndLig[:, 1],
             inf_lim=0.5, sup_lim=1.5,
             sTitle=f"Índices de Ligação e Setores-Chave - {nYear}",
@@ -665,7 +711,7 @@ if __name__ == '__main__':
             vLabels=vSectors_Graph,  sFigName=f"Ind_Lig_{nYear}", PointColor=lColours
         )
         # Pure (GHS)
-        figIndPureLig = Support.named_scatter_plot(
+        Support.named_scatter_plot(
             x=mIndPureLigNorm[:, 2], y=mIndPureLigNorm[:, 1],
             inf_lim=0, sup_lim=math.ceil(np.max(mIndPureLigNorm[:, 1:3])), nTextLimit=1,
             sTitle=f"Índices de Ligação Puros Normalizados e Setores-Chave - {nYear}",
@@ -677,40 +723,39 @@ if __name__ == '__main__':
         ## Hypothetical extraction
         # BL % (production loss if the sector doesn't buy anything from the rest of economy,
         # relative to total economic production)
-        figExtractionBackwards = Support.bar_plot(
+        Support.bar_plot(
             vData=mExtractions[:, 3], vXLabels=vSectors_Graph,
             sTitle=f"Perda de Produção por Extração Hipótetica - Estrutura de Compras (%) - {nYear}", sXTitle="Setores",
             sFigName=f"Extr_Hipo_Compras_{nYear}", nY_Adjust=0.01, BarColor="green"
         )
         # FL % (production loss if the sector doesn't sell anything to the other economic sectors,
         # relative to total economic production)
-        figExtractionForwards = Support.bar_plot(
+        Support.bar_plot(
             vData=mExtractions[:, 4], vXLabels=vSectors_Graph,
             sTitle=f"Perda de Produção por Extração Hipótetica - Estrutura de Vendas (%) - {nYear}", sXTitle="Setores",
             sFigName=f"Extr_Hipo_Vendas_{nYear}", nY_Adjust=0.01, BarColor="green"
         )
 
         ## Influence matrix
-        figInfluenceCont, figInfluenceDisc = \
-            Support.influence_matrix_graph(mInfluence, vSectors_Graph, nSectors,
-                                           sTitle=f"Campo de Influência - {nYear}",
-                                           sFigName=f"Campo_de_Influencia_{nYear}"
-                                           )
+        Support.influence_matrix_graph(mInfluence, vSectors_Graph, nSectors,
+                                       sTitle=f"Campo de Influência - {nYear}",
+                                       sFigName=f"Campo_de_Influencia_{nYear}"
+                                       )
         ## Structural decomposition
         if doStructure:
-            figDeltaX = Support.bar_plot(
+            Support.bar_plot(
                 vData=mDecomposition[:nSectors1, 1], vXLabels=vSectors_Graph1,
                 sTitle=f"Variação da Produção {nYear_Decomp} - {nYear} (R$ Milhões 2010)",
                 sXTitle="Setores", sFigName=f"Var_Prod_{nYear_Decomp}-{nYear}",
                 BarColor="darkblue", bAnnotate=False, nDirectory=nSectors
             )
-            figDeltaTech = Support.bar_plot(
+            Support.bar_plot(
                 vData=mDecomposition[:nSectors1, 2], vXLabels=vSectors_Graph1,
                 sTitle=f"Decomposição - Variação Tecnológica {nYear_Decomp} - {nYear}",
                 sXTitle="Setores", sFigName=f"Var_Tecno_{nYear_Decomp}-{nYear}",
                 BarColor="darkred", bAnnotate=False, nDirectory=nSectors
             )
-            figDeltaDemand = Support.bar_plot(
+            Support.bar_plot(
                 vData=mDecomposition[:nSectors1, 3], vXLabels=vSectors_Graph1,
                 sTitle=f"Decomposição - Variação da Demanda Final {nYear_Decomp} - {nYear}",
                 sXTitle="Setores", sFigName=f"Var_DemFinal_{nYear_Decomp}-{nYear}",
