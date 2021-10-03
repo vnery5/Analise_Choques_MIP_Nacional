@@ -30,7 +30,7 @@ if __name__ == '__main__':
     bGuilhoto = True  # True or False
 
     ## Whether to create and save figures
-    saveFig = True  # True or False
+    saveFig = False  # True or False
 
     ## Highlight one sectors? If so, which index and color?
     bHighlightSectorFigs = True  # True or False
@@ -170,11 +170,12 @@ if __name__ == '__main__':
             mAddedValue[nRowRM, :] = 0
             mAddedValue[nRowEOB, :] = mEOB_Guilhoto.reshape(-1)
 
-            ## Changing MIP DataFrame
+            ## Creating new MIP DataFrame
+            dfMIP_OpenGuilhoto = dfMIP.copy()
             # Updating added value components
-            dfMIP.iloc[-15:-1, :nSectors] = mAddedValue
+            dfMIP_OpenGuilhoto.iloc[-15:-1, :nSectors] = mAddedValue
             # Dropping EOB + RM and RM
-            dfMIP.drop(index=dfMIP.iloc[-8:-6, :].index.tolist(), inplace=True)
+            dfMIP_OpenGuilhoto.drop(index=dfMIP.iloc[-8:-6, :].index.tolist(), inplace=True)
 
     ## A and Leontief's matrix in the closed model
     """
@@ -521,9 +522,14 @@ if __name__ == '__main__':
 
     print(f"Writing Excel file... ({datetime.datetime.now()})")
 
-    # Original Input-Output matrix
+    # Original Input-Output Matrix
     vNameSheets = ["MIP_Original"]
     vDataSheets = [dfMIP]
+
+    # Guilhoto's Open Model Matrix (if requested)
+    if bOpenGuilhoto and bUpdateMIPOpenGuilhoto:
+        vNameSheets.append("MIP_OpenGuilhoto")
+        vDataSheets.append(dfMIP_OpenGuilhoto)
 
     # Production Multipliers
     vNameSheets.append("Mult_Prod")
