@@ -44,6 +44,8 @@ if __name__ == '__main__':
 
     ## Open model methodology: use Guilhoto's (True) or Vale, Perobelli's (False)?
     bOpenGuilhoto = True  # True or False
+    # If bOpenGuilhoto, update added values components in output MIP?
+    bUpdateMIPOpenGuilhoto = True
 
     ### ============================================================================================
 
@@ -154,13 +156,25 @@ if __name__ == '__main__':
         mFinalDemand_Import_Taxes = np.vstack((mFinalDemand, mSP_FD))
 
         ## Finding consumption and total income under Guilhoto
-        mC_Guilhoto, mR_Guilhoto, nTotalConsumption = \
+        mC_Guilhoto, mR_Guilhoto, mEOB_Guilhoto, nTotalConsumption = \
             Support.open_model_guilhoto(mFinalDemand_Import_Taxes, mAddedValue, nSectors, nColISFLSFConsumption,
                                         nColFamilyConsumption, nRowRemunerations, nRowRM, nRowEOB)
 
         ## Calculating coefficients
         hC = mC_Guilhoto / nTotalConsumption
         hR = mR_Guilhoto / mX
+
+        ## Replacing values in added value matrix (if requested)
+        if bUpdateMIPOpenGuilhoto:
+            mAddedValue[nRowRemunerations, :] = mR_Guilhoto.reshape(-1)
+            mAddedValue[nRowRM, :] = 0
+            mAddedValue[nRowEOB, :] = mEOB_Guilhoto.reshape(-1)
+
+            ## Changing MIP DataFrame
+            # Updating added value components
+            dfMIP.iloc[-15:-1, :nSectors] = mAddedValue
+            # Dropping EOB + RM and RM
+            dfMIP.drop(index=dfMIP.iloc[-8:-6, :].index.tolist(), inplace=True)
 
     ## A and Leontief's matrix in the closed model
     """
