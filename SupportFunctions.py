@@ -125,8 +125,9 @@ def read_estimated_mip(sFileMIP, sSheetName="MIP"):
     # Added Value Initial Line
     nAV, = np.where(vRowNames == "Valor adicionado bruto ( PIB )")
     nRelativePositionAV = nAV[0] - len(vRowNames)  # usually, -15; for nSectors = 51, -13
+
     # Added Value Names
-    vAVNames = mMIP[nRelativePositionAV:-1, 0]
+    vAVNames = np.array(dfMIP.index)[nRelativePositionAV:-1]
 
     # Final Demand Names
     vFDNames = dfMIP.columns[nSectors + 1:-2]
@@ -613,7 +614,7 @@ def open_model_guilhoto(mFinalDemand, mAddedValue, nSectors, nColISFLSFConsumpti
         mR_Guilhoto += mEOB / nTotalEOB * nTotalDifference
         mEOB += -mEOB / nTotalEOB * nTotalDifference
 
-    return mC_Guilhoto[:nSectors, :], mR_Guilhoto, nTotalConsumption
+    return mC_Guilhoto[:nSectors, :], mR_Guilhoto, mEOB, nTotalConsumption
 
 def leontief_closed(mTechnical, cConsumption, cRem, nSectors):
     """
