@@ -185,6 +185,45 @@ def correct_order(df):
 
     return dfOrdered
 
+def read_deflator(nYear, nSectors, EstimaMIP=True):
+    """
+    Reads the excel file containing price indexes by sector for intermediate consumption, final demand and production
+    2010 = 100
+    :param nYear: Desired year to get the price index
+    :param nSectors: Number of sectors
+    :param EstimaMIP: boolean; whether to get indexes calculated using "EstimaMIP" matrixes
+        EstimaMIP=True is the only option when working with more than 20 sectors
+    :return:
+        mZ_index: price indexes for intermediate consumption (nSectors x nSectors matrix)
+        mY_index: price indexes for final demand (nSectors vector)
+        mX_index: price indexes for production (nSectors vector)
+    """
+
+    ## Getting file path
+    if EstimaMIP or ((EstimaMIP is False) and (nSectors > 20)):
+        if nSectors > 68:
+            sFile = f"./Input/Deflatores/Deflatores_EstimaMIP_68+.xlsx"
+        else:
+            sFile = f"./Input/Deflatores/Deflatores_EstimaMIP_{nSectors}.xlsx"
+    else:
+        sFile = f"./Input/Deflatores/Deflatores_Tru_{nSectors}.xlsx"
+
+    ## Reading Excel files
+    mZ_index = pd.read_excel(sFile, sheet_name="Consum_Intermed").to_numpy()
+    mY_index = pd.read_excel(sFile, sheet_name="Demanda_Final").to_numpy()
+    mX_index = pd.read_excel(sFile, sheet_name="Producao").to_numpy()
+
+    ## Getting relevant year's data
+    # Intermediate Consumption
+    mZ_index = mZ_index[(nYear - 2010)*nSectors:(nYear + 1 - 2010)*nSectors, 2:]
+    mZ_index = mZ_index.astype(float)
+    # Final Demand
+    mY_index = mY_index[nYear - 2010, 1:].astype(float)
+    # Production
+    mX_index = mX_index[nYear - 2010, 1:].astype(float)
+
+    return mZ_index, mY_index, mX_index
+
 ### ============================================================================================
 
 def abbreviate_sectors_names(vSectors):
@@ -261,45 +300,6 @@ def abbreviate_sectors_names(vSectors):
         vSectors_Graph.append(new_name)
 
     return vSectors_Graph
-
-def read_deflator(nYear, nSectors, EstimaMIP=True):
-    """
-    Reads the excel file containing price indexes by sector for intermediate consumption, final demand and production
-    2010 = 100
-    :param nYear: Desired year to get the price index
-    :param nSectors: Number of sectors
-    :param EstimaMIP: boolean; whether to get indexes calculated using "EstimaMIP" matrixes
-        EstimaMIP=True is the only option when working with more than 20 sectors
-    :return:
-        mZ_index: price indexes for intermediate consumption (nSectors x nSectors matrix)
-        mY_index: price indexes for final demand (nSectors vector)
-        mX_index: price indexes for production (nSectors vector)
-    """
-
-    ## Getting file path
-    if EstimaMIP or ((EstimaMIP is False) and (nSectors > 20)):
-        if nSectors > 68:
-            sFile = f"./Input/Deflatores/Deflatores_EstimaMIP_68+.xlsx"
-        else:
-            sFile = f"./Input/Deflatores/Deflatores_EstimaMIP_{nSectors}.xlsx"
-    else:
-        sFile = f"./Input/Deflatores/Deflatores_Tru_{nSectors}.xlsx"
-
-    ## Reading Excel files
-    mZ_index = pd.read_excel(sFile, sheet_name="Consum_Intermed").to_numpy()
-    mY_index = pd.read_excel(sFile, sheet_name="Demanda_Final").to_numpy()
-    mX_index = pd.read_excel(sFile, sheet_name="Producao").to_numpy()
-
-    ## Getting relevant year's data
-    # Intermediate Consumption
-    mZ_index = mZ_index[(nYear - 2010)*nSectors:(nYear + 1 - 2010)*nSectors, 2:]
-    mZ_index = mZ_index.astype(float)
-    # Final Demand
-    mY_index = mY_index[nYear - 2010, 1:].astype(float)
-    # Production
-    mX_index = mX_index[nYear - 2010, 1:].astype(float)
-
-    return mZ_index, mY_index, mX_index
 
 def bar_plot(vData, vXLabels, sTitle, sXTitle, sFigName,
              nY_Adjust=0.001, BarColor="#595959", bMean=False, bAnnotate=True, nDirectory=None):
@@ -677,8 +677,7 @@ def calc_multipliers(vInput, vProduction, mDirectCoef, mLeontief_open, mLeontief
     :param mLeontief_closed: Leontief Matrix (closed model)
     :param vSectors: array containing sector's names
     :param nSectors: number of sectors
-    :return:
-        mMultipliers: matrix containing the multiplier by sector
+    :return: mMultipliers: matrix containing the multiplier by sector
     """
 
     ## Coefficients: how much of income/labor/taxes is necessary in order to produce 1 unit in each sector
@@ -812,8 +811,7 @@ def influence_matrix(mA, nIncrement, nSectors):
     :param mA: technical coefficient matrix
     :param nIncrement: integer containing the increment
     :param nSectors: number of sectors
-    :return:
-        mInfluence: influence matrix
+    :return: mInfluence: influence matrix
     """
 
     ## Calculating Leontief's Matrix
@@ -855,8 +853,7 @@ def extraction(mA, mA_supply, vProduction, vFinalDemand, mSP, vSectors, nSectors
     :param mSP: payment sector matrix
     :param vSectors: vector containing sector's names
     :param nSectors: number of sectors
-    :return:
-        mExtractions: table with the extraction indicators for each sector
+    :return: mExtractions: table with the extraction indicators for each sector
     """
 
     ## Matrices structure
@@ -976,7 +973,7 @@ def aggregate_shocks(dfData, nSectorsAggreg, sAggregFile, sAggregSheet, Aggreg, 
     :param lDisaggreg_Sectors: Vector containing the indexes of the sectors to NOT be aggregated
     :param lAdd_Names: Vector containing the names of the "new" sectors that are created when bundling
     :param vSectors: Vector containing sector names
-    :return:
+    :return: dfData: Aggregated DataFrame
     """
 
     ## Checking to see if the number of base sectors is supported
