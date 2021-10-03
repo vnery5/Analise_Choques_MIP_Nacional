@@ -637,66 +637,66 @@ if __name__ == '__main__':
 
         ## Employment Multipliers
         Support.bar_plot(
-            vData=mEmpMultipliers[:, 1], vXLabels=vSectors_Graph,
+            vData=mEmpMultipliers[:, 2], vXLabels=vSectors_Graph,
             sTitle=f"Multiplicadores Simples de Emprego - {nYear}", sXTitle="Setores", BarColor=lColours,
             sFigName=f"Mult_Emp_Simples_{nYear}", nY_Adjust=0.1
         )
         Support.bar_plot(
-            vData=mEmpMultipliers[:, 2], vXLabels=vSectors_Graph,
+            vData=mEmpMultipliers[:, 3], vXLabels=vSectors_Graph,
             sTitle=f"Multiplicadores de Emprego (Tipo I) - {nYear}", sXTitle="Setores",
             sFigName=f"Mult_Emp_Tipo1_{nYear}", nY_Adjust=0.05, BarColor=lColours
         )
         Support.bar_plot(
-            vData=mEmpMultipliers[:, 3], vXLabels=vSectors_Graph,
+            vData=mEmpMultipliers[:, 4], vXLabels=vSectors_Graph,
             sTitle=f"Multiplicadores Totais de Emprego (Truncados) - {nYear}", sXTitle="Setores", BarColor=lColours,
             sFigName=f"Mult_Emp_Tot_{nYear}", nY_Adjust=0.1
         )
         Support.bar_plot(
-            vData=mEmpMultipliers[:, 4], vXLabels=vSectors_Graph,
+            vData=mEmpMultipliers[:, 5], vXLabels=vSectors_Graph,
             sTitle=f"Multiplicadores de Emprego (Tipo II) - {nYear}", sXTitle="Setores",
             sFigName=f"Mult_Emp_Tipo2_{nYear}", nY_Adjust=0.08, BarColor=lColours
         )
 
         ## Income Multipliers
         Support.bar_plot(
-            vData=mIncomeMultipliers[:, 1], vXLabels=vSectors_Graph,
+            vData=mIncomeMultipliers[:, 2], vXLabels=vSectors_Graph,
             sTitle=f"Multiplicadores Simples de Renda - {nYear}", sXTitle="Setores",
             sFigName=f"Mult_Renda_Simples_{nYear}", nY_Adjust=0.0005, BarColor=lColours
         )
         Support.bar_plot(
-            vData=mIncomeMultipliers[:, 2], vXLabels=vSectors_Graph,
+            vData=mIncomeMultipliers[:, 3], vXLabels=vSectors_Graph,
             sTitle=f"Multiplicadores de Renda (Tipo I) - {nYear}", sXTitle="Setores",
             sFigName=f"Mult_Renda_Tipo1_{nYear}", BarColor=lColours
         )
         Support.bar_plot(
-            vData=mIncomeMultipliers[:, 3], vXLabels=vSectors_Graph,
+            vData=mIncomeMultipliers[:, 4], vXLabels=vSectors_Graph,
             sTitle=f"Multiplicadores Totais de Renda (Truncados) - {nYear}", sXTitle="Setores",
             sFigName=f"Mult_Renda_Tot_{nYear}", nY_Adjust=0.0005, BarColor=lColours
         )
         Support.bar_plot(
-            vData=mIncomeMultipliers[:, 4], vXLabels=vSectors_Graph,
+            vData=mIncomeMultipliers[:, 5], vXLabels=vSectors_Graph,
             sTitle=f"Multiplicadores de Renda (Tipo II) - {nYear}", sXTitle="Setores",
             sFigName=f"Mult_Renda_Tipo2_{nYear}", nY_Adjust=0.002, BarColor=lColours
         )
 
         ## Taxes Multipliers
         Support.bar_plot(
-            vData=mTaxesMultipliers[:, 1], vXLabels=vSectors_Graph,
+            vData=mTaxesMultipliers[:, 2], vXLabels=vSectors_Graph,
             sTitle=f"Multiplicadores Simples de Impostos - {nYear}", sXTitle="Setores",
             sFigName=f"Mult_Imp_Simples_{nYear}", nY_Adjust=0.0005, BarColor=lColours
         )
         Support.bar_plot(
-            vData=mTaxesMultipliers[:, 2], vXLabels=vSectors_Graph,
+            vData=mTaxesMultipliers[:, 3], vXLabels=vSectors_Graph,
             sTitle=f"Multiplicadores de Impostos (Tipo I) - {nYear}", sXTitle="Setores",
             sFigName=f"Mult_Imp_Tipo1_{nYear}", BarColor=lColours
         )
         Support.bar_plot(
-            vData=mTaxesMultipliers[:, 3], vXLabels=vSectors_Graph,
+            vData=mTaxesMultipliers[:, 4], vXLabels=vSectors_Graph,
             sTitle=f"Multiplicadores Totais de Impostos (Truncados) - {nYear}", sXTitle="Setores",
             sFigName=f"Mult_Imp_Tot_{nYear}", nY_Adjust=0.0005, BarColor=lColours
         )
         Support.bar_plot(
-            vData=mTaxesMultipliers[:, 4], vXLabels=vSectors_Graph,
+            vData=mTaxesMultipliers[:, 5], vXLabels=vSectors_Graph,
             sTitle=f"Multiplicadores de Impostos (Tipo II) - {nYear}", sXTitle="Setores",
             sFigName=f"Mult_Imp_Tipo2_{nYear}", nY_Adjust=0.002, BarColor=lColours
         )
