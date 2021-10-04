@@ -645,12 +645,12 @@ def leontief_closed(mTechnical, cConsumption, cRem, nSectors):
 
 def ghosh_supply(mIC, vProduction, nSectors):
     """
-    Calculates Ghosh's and the Direct Technical Coefficients matrices (supply-side model)
+    Calculates Ghosh's and the Direct Technical Coefficients Matrices (supply-side model)
     :param mIC: array containing the intermediate consumption matrix
     :param vProduction: array containing the production vector
     :param nSectors: number of sectors in matrix
     :return:
-        mA: technical coefficients matrix
+        mF: technical coefficients matrix
         mGhosh: Ghosh's matrix
     """
 
@@ -658,15 +658,17 @@ def ghosh_supply(mIC, vProduction, nSectors):
     mX_diag = np.diagflat(1 / vProduction)
 
     ## A matrix
-    mA = mX_diag.dot(mIC)
+    # Instead of dividing by the production of sector j, we divide by production of sector i
+    mF = mX_diag.dot(mIC)
 
     ## Calculating Ghosh's Matrix
     # Identity
     mI = np.eye(nSectors)
-    # Inverse
-    mGhosh = np.linalg.inv(mI - mA)
 
-    return mA, mGhosh
+    # Inverse
+    mGhosh = np.linalg.inv(mI - mF)
+
+    return mF, mGhosh
 
 def calc_multipliers(vInput, vProduction, mDirectCoef, mLeontief_open, mLeontief_closed, vSectors, nSectors):
     """

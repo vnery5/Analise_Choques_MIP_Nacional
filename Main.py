@@ -42,10 +42,10 @@ if __name__ == '__main__':
     # Year to be compared in the structural decomposition
     nYear_Decomp = 2011
 
-    ## Open model methodology: use Guilhoto's (True) or Vale, Perobelli's (False)?
-    bOpenGuilhoto = True  # True or False
-    # If bOpenGuilhoto, update added values components in output MIP?
-    bUpdateMIPOpenGuilhoto = True
+    ## Closed model methodology: use Guilhoto's (True) or Vale, Perobelli's (False)?
+    bClosedGuilhoto = True  # True or False
+    # If bClosedGuilhoto, update added values components in output MIP?
+    bUpdateMIPClosedGuilhoto = True
 
     ### ============================================================================================
 
@@ -120,13 +120,13 @@ if __name__ == '__main__':
     In order to capture these phenomena, the model must be "closed" in relation to the families, 
     turning household consumption into an endogenous variable alongside labor remunerations
     """
-    ### Calculating Coefficients
+    ## Calculating Coefficients
     ## Methodology proposed by Vale, Perobelli, 2021
-    # n = 51 sectors doesn't have the differentiation between EOB and RM (required for Guilhoto's methodology)
-    if not bOpenGuilhoto or nDimension == 3:
+    ## n = 51 sectors doesn't have the differentiation between EOB and RM (required for Guilhoto's methodology)
+    if not bClosedGuilhoto or nDimension == 3:
         ## Indicator for differentiation when saving spreadsheet
-        sOpenGuilhotoIndicator = "_Open_Perobelli"
-        print("Open model: Vale and Perobelli")
+        sClosedGuilhotoIndicator = "_Closed_Perobelli"
+        print("Closed model: Vale and Perobelli")
 
         # Consumption: what families (not including ISFLSF) consume of each sector in respect to total income
         # (only including remunerations or, in other words, excluding EOB and RM)
@@ -140,8 +140,8 @@ if __name__ == '__main__':
     # Idea: income = total consumption (usually < in TRUs and MIPs when working with only remuneration)
     else:
         ## Indicator for differentiation when saving spreadsheet
-        sOpenGuilhotoIndicator = "_Open_Guilhoto"
-        print("Open model: Guilhoto")
+        sClosedGuilhotoIndicator = "_Closed_Guilhoto"
+        print("Closed model: Guilhoto")
 
         ## Column and row numbers (base 0) (we don't need to worry about n = 51 because Guilhoto isn't possible)
         # Final Demand
@@ -164,18 +164,19 @@ if __name__ == '__main__':
         hC = mC_Guilhoto / nTotalConsumption
         hR = mR_Guilhoto / mX
 
-        ## Replacing values in added value matrix (if requested)
-        if bUpdateMIPOpenGuilhoto:
+        ## Replacing values in MIP (if requested)
+        if bUpdateMIPClosedGuilhoto:
+            # Replacing values in added value matrix
             mAddedValue[nRowRemunerations, :] = mR_Guilhoto.reshape(-1)
             mAddedValue[nRowRM, :] = 0
             mAddedValue[nRowEOB, :] = mEOB_Guilhoto.reshape(-1)
 
             ## Creating new MIP DataFrame
-            dfMIP_OpenGuilhoto = dfMIP.copy()
+            dfMIP_ClosedGuilhoto = dfMIP.copy()
             # Updating added value components
-            dfMIP_OpenGuilhoto.iloc[-15:-1, :nSectors] = mAddedValue
+            dfMIP_ClosedGuilhoto.iloc[-15:-1, :nSectors] = mAddedValue
             # Dropping EOB + RM and RM
-            dfMIP_OpenGuilhoto.drop(index=dfMIP.iloc[-8:-6, :].index.tolist(), inplace=True)
+            dfMIP_ClosedGuilhoto.drop(index=dfMIP.iloc[-8:-6, :].index.tolist(), inplace=True)
 
     ## A and Leontief's matrix in the closed model
     """
@@ -184,10 +185,20 @@ if __name__ == '__main__':
     Therefore, the coefficients of mB_closed are larger than those of mB and their difference can be interpreted
     as the induced impacts of household consumption expansion upon the production of each sector.
     """
+    # Calculating A and Leontief's Matrices
     mA_closed, mB_closed = Support.leontief_closed(mA, hC, hR, nSectors)
 
     ### Supply-side model
-    mA_supply, mGhosh = Support.ghosh_supply(mZ, mX, nSectors)
+    """
+    In this model, we look at the economy by the supply side, which has a few implications:
+    1. To calculate direct technical coefficients (mF matrix), we divide by production of sector i, not j.
+    Therefore, mF tells us the percentage of sector's i production that was sold to activity j.
+    2. Since we are using the supply-side coefficients, the exogenous variable is no longer final demand;
+    we use the total payment sector vector (PS: imports, taxes and added value components).
+    In other words, we have that X = PS*G, where G is the Ghosh Matrix.
+    """
+    ## Calculating F and Ghosh's Matrices
+    mF, mGhosh = Support.ghosh_supply(mZ, mX, nSectors)
 
     ### ============================================================================================
     ### Production Multipliers
@@ -401,7 +412,7 @@ if __name__ == '__main__':
     ### ============================================================================================
 
     mExtractions_Col_Names = ["Setor", "BL", "FL", "BL%", "FL%"]
-    mExtractions = Support.extraction(mA, mA_supply, mX, mY, mSP, vSectors, nSectors)
+    mExtractions = Support.extraction(mA, mF, mX, mY, mSP, vSectors, nSectors)
 
     ### ============================================================================================
     ### Structural Decomposition - Open Model (p. 112)
@@ -527,9 +538,9 @@ if __name__ == '__main__':
     vDataSheets = [dfMIP]
 
     # Guilhoto's Open Model Matrix (if requested)
-    if bOpenGuilhoto and bUpdateMIPOpenGuilhoto:
-        vNameSheets.append("MIP_OpenGuilhoto")
-        vDataSheets.append(dfMIP_OpenGuilhoto)
+    if bClosedGuilhoto and bUpdateMIPClosedGuilhoto:
+        vNameSheets.append("MIP_ClosedGuilhoto")
+        vDataSheets.append(dfMIP_ClosedGuilhoto)
 
     # Production Multipliers
     vNameSheets.append("Mult_Prod")
@@ -602,7 +613,7 @@ if __name__ == '__main__':
 
     # Direct coefficients (supply-side model)
     vNameSheets.append("Coef_Diretos_Oferta (mA)")
-    vDataSheets.append(pd.DataFrame(mA_supply, columns=vSectors, index=vSectors))
+    vDataSheets.append(pd.DataFrame(mF, columns=vSectors, index=vSectors))
 
     # Leontief (supply-side model)
     vNameSheets.append("Matriz de Ghosh")
@@ -610,7 +621,7 @@ if __name__ == '__main__':
 
     ## Writing Excel File to 'Output' directory
     Support.write_data_excel(sDirectory="./Output/Tabelas_Main/Análises/",
-                             sFileName=f"Resultados_{nYear}_{nSectors}{sAPF}{sOpenGuilhotoIndicator}.xlsx",
+                             sFileName=f"Resultados_{nYear}_{nSectors}{sAPF}{sClosedGuilhotoIndicator}.xlsx",
                              vSheetName=vNameSheets, vDataSheet=vDataSheets)
 
     ### ============================================================================================
