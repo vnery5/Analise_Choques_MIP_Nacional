@@ -171,7 +171,7 @@ def read_estimated_mip(sFileMIP, sSheetName="MIP"):
 def correct_order(df):
     """
     For base 12 sector aggregation, fixes the output order
-    :param df: DataFrame containing the unaggrated data
+    :param df: DataFrame containing the disaggregated data
     :return: dfOrdered: Ordered DataFrame
     """
     # Getting Housing and Food values
@@ -657,7 +657,7 @@ def ghosh_supply(mIC, vProduction, nSectors):
     ## Diagonal Matrix of total production
     mX_diag = np.diagflat(1 / vProduction)
 
-    ## A matrix
+    ## F matrix
     # Instead of dividing by the production of sector j, we divide by production of sector i
     mF = mX_diag.dot(mIC)
 
@@ -915,7 +915,7 @@ def format_shock_sheet(vNew, vOld, vDelta, vPercentage, vSectors, vColNames):
     :param vDelta: computed change between the above vectors
     :param vPercentage: computed percentage change between vNew and vOld
     :param vSectors: vector containing sector names
-    :param vColNames: vector containig column names for the sheet
+    :param vColNames: vector containing column names for the sheet
     :return: dfSheet: dataframe containing formatted data with impacts of the shock for each sector
     """
 
@@ -968,7 +968,7 @@ def aggregate_shocks(dfData, nSectorsAggreg, sAggregFile, sAggregSheet, Aggreg, 
     Having done all the calculations and formatting for the shock, aggregate/bundle up results
     :param dfData: DataFrame to be aggregated
     :param nSectorsAggreg: number of base sectors to aggregate to
-    :param sAggregFile: name of the file containig aggregatation correspondence
+    :param sAggregFile: name of the file containing aggregation correspondence
     :param sAggregSheet: name of the sheet within sAggregFile
     :param Aggreg: Aggregate?
     :param Add_Sectors: Bundle Up Sectors?

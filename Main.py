@@ -207,6 +207,7 @@ if __name__ == '__main__':
     ## Simple Production Multipliers (open model)
     """
     Given an increase of 1 in the demand of sector j, how much output/production is generated in the economy?
+    Considers not only the direct effects, but also the indirect ones (power series approximation).
     """
     MP = np.sum(mB, axis=0)
 
@@ -235,7 +236,7 @@ if __name__ == '__main__':
     MPTT = np.sum(mB_closed[:nSectors, :nSectors], axis=0)
     mInducedEffectTrunc = np.sum(mB_closed[:nSectors, :nSectors], axis=0) - np.sum(mB, axis=0)
 
-    ## Creating array with all multipliers
+    ## Creating array with all multiplier names
     mProdMultipliers_Col_Names = [
         "Setor", "Multiplicador Simples de Produção", "Multiplicador Total de Produção",
         "Multiplicador Total de Produção Truncado", "Efeito Direto", "Efeito Indireto", "Efeito Induzido"
@@ -288,7 +289,7 @@ if __name__ == '__main__':
         "Efeito Direto", "Efeito Indireto", "Efeito Induzido"
     ]
 
-    ## "Vector" (nSectors x 1 matrix) containing all taxes paid by sectors
+    ## "Vector" (nSectors x 1 matrix) containing all taxes paid by sectors (not considering mSP_FD)
     mTaxes = np.sum(mSP[1:5, :], axis=0, keepdims=True).T
 
     ## Creating table with all multipliers
