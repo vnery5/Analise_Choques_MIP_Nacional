@@ -30,11 +30,11 @@ if __name__ == '__main__':
     bGuilhoto = True  # True or False
 
     ## Whether to create and save figures
-    saveFig = False  # True or False
+    saveFig = True  # True or False
 
     ## Highlight one sectors? If so, which index and color?
     bHighlightSectorFigs = True  # True or False
-    nIndexHighlightSectorsFigs = 3  # 3: Electricity (when using 20 sectors)
+    nIndexHighlightSectorsFigs = 3 if nDimension == 2 else 37  # 3 or 37: Electricity & Gas (base 0 index)
     sHighlightColor = "red"
 
     ## Do a structural decomposition?
@@ -195,7 +195,7 @@ if __name__ == '__main__':
     Therefore, mF tells us the percentage of sector's i production that was sold to activity j.
     2. Since we are using the supply-side coefficients, the exogenous variable is no longer final demand;
     we use the total payment sector vector (PS: imports, taxes and added value components).
-    In other words, we have that X = PS*G, where G is the Ghosh Matrix.
+    In other words, we have that X = PS*G, where G is the Ghosh Matrix = inv(I-F).
     """
     ## Calculating F and Ghosh's Matrices
     mF, mGhosh = Support.ghosh_supply(mZ, mX, nSectors)
@@ -307,50 +307,20 @@ if __name__ == '__main__':
     """
     ### ============================================================================================
 
-    ## Meaning across lines (get column totals) in Leontief's matrix: backwards linkages
-    # Indices show how much other sector's have to produce in order to meet a rise of 1 unit in sector's j final demand
-    nBL_Bar = np.mean(mB, axis=0)
-
-    ## Adding across columns (get row/line totals) in Leontief's matrix: forward linkages
-    # Indices show how much sector i has to produce in order to meet a rise of 1 in final demand of the whole economy
-    nFL_Bar = np.mean(mB, axis=1)
-
-    ## Mean of all indirect and direct technical coefficients
-    nMT = np.sum(mB) / nSectors**2
-
-    ## Backwards-Looking Index (Uj)
-    BL = nBL_Bar / nMT
-    ## Forward-Looking Index (Ui)
-    FL = nFL_Bar / nMT
-
-    ## Using Ghosh's matrix (supply-side model)
-    MLG = np.mean(mGhosh, axis=1)
-    G_star = np.sum(mGhosh) / nSectors**2
-    FLG = MLG / G_star
-
-    ## Joining all indices
+    ## Calculating forwards and backwards
+    # Column names
     mIndLig_Col_Names = ["Setor", "Para Trás", "Para Frente", "Para Frente Ghosh"]
-    mIndLig = np.vstack((vSectors, BL, FL, FLG)).T
 
-    ## Checking key sectors
-    # Transforming into a dataframe
-    dfIndLig = pd.DataFrame(mIndLig, columns=mIndLig_Col_Names[:4])
-    dfIndLig['Setores-Chave'] = np.where(
-        (dfIndLig['Para Trás'] >= 1) & (dfIndLig['Para Frente Ghosh'] >= 1),
-        "Setor-Chave",
-        "-"
-    )
-
-    # Updating array
-    mIndLig_Col_Names = ["Setor", "Para Trás", "Para Frente", "Para Frente Ghosh", "Setor-Chave"]
-    mIndLig = dfIndLig.to_numpy()
+    # Calculations and appending "Setor-Chave" to names vector
+    mIndLig = Support.linkages(mB, mGhosh, mIndLig_Col_Names, nSectors, vSectors)
+    mIndLig_Col_Names.append("Setor-Chave")
 
     ### Variance Coefficients
     ## The lower the coefficient, the larger the number of sectors impacted by that sector's...
     # ... increase in production/sales
-    CVi = np.std(mB, axis=1, ddof=1) / nFL_Bar
+    CVi = np.std(mB, axis=1, ddof=1) / np.mean(mB, axis=1)
     # ... increase in final demand
-    CVj = np.std(mB, axis=0, ddof=1) / nBL_Bar
+    CVj = np.std(mB, axis=0, ddof=1) / np.mean(mB, axis=0)
 
     ## Joining into an aggregated table
     mVarCoef_Col_Names = ["Setor", "CVi", "CVj"]
@@ -358,8 +328,8 @@ if __name__ == '__main__':
 
     ### Pure Linkages (GHS or, in portuguese, IPL)
     """
-    As pointed out by Guilhoto (2009), the traditional indexes don't take into consideration
-    the production levels of each sector. The "pure" or "generalized" version doesn't have this problem.
+    As pointed out by Guilhoto et al. (1994, 1996) and Guilhoto (2009), the traditional indexes don't take into
+    consideration the production levels of each sector. The "pure" or "generalized" version doesn't have this problem.
     The backwards pure index (PBL) shows the impact of the production value of sector j upon the rest of the economy,
     excluding self-demand for its own inputs and the returns of the rest of the economy to the sector, representing,
     therefore, the relative importance of that sector's DEMAND.
@@ -737,10 +707,10 @@ if __name__ == '__main__':
         # Traditional (HR)
         Support.named_scatter_plot(
             x=mIndLig[:, 3], y=mIndLig[:, 1],
-            inf_lim=0.5, sup_lim=1.5,
+            inf_lim=0.5, sup_lim=1.5 if nSectors <= 20 else 2,
             sTitle=f"Índices de Ligação e Setores-Chave - {nYear}",
             sXTitle="Índice de Ligação para Frente  - Matriz de Ghosh", sYTitle="Índice de Ligação para Trás",
-            vLabels=vSectors_Graph,  sFigName=f"Ind_Lig_{nYear}", PointColor=lColours
+            vLabels=vSectors_Graph,  sFigName=f"Ind_Lig_{nYear}", PointColor=lColours, bPureLinkages=False
         )
         # Pure (GHS)
         Support.named_scatter_plot(
@@ -749,7 +719,7 @@ if __name__ == '__main__':
             sTitle=f"Índices de Ligação Puros Normalizados e Setores-Chave - {nYear}",
             sXTitle="Índice Puro de Ligação para Frente Normalizados (PFLN)",
             sYTitle="Índice de Ligação para Trás Normalizados (PBLN)",
-            vLabels=vSectors_Graph,  sFigName=f"Ind_Lig_Puros_{nYear}", PointColor=lColours
+            vLabels=vSectors_Graph,  sFigName=f"Ind_Lig_Puros_{nYear}", PointColor=lColours, bPureLinkages=True
         )
 
         ## Hypothetical extraction

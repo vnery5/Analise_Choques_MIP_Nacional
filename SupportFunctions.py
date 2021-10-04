@@ -371,8 +371,8 @@ def bar_plot(vData, vXLabels, sTitle, sXTitle, sFigName,
     fig.savefig(sFileName, dpi=600, bbox_inches="tight")
     plt.close(fig)
 
-def named_scatter_plot(x, y, inf_lim, sup_lim, sTitle, vLabels, sXTitle,
-                       sYTitle, sFigName, nTextLimit=0.045, PointColor="black"):
+def named_scatter_plot(x, y, inf_lim, sup_lim, sTitle, vLabels, sXTitle, sYTitle, sFigName,
+                       bPureLinkages, nTextLimit=0.045, PointColor="black"):
     """
     Creates a styled scatter plot containing the data and labels
     :param x: data for the x axis
@@ -383,8 +383,8 @@ def named_scatter_plot(x, y, inf_lim, sup_lim, sTitle, vLabels, sXTitle,
     :param vLabels: vector containing the point labels
     :param sXTitle: string containing the title for the x axis
     :param sYTitle: string containing the title for the y axis
-    :param sFigName: desired file name of the saved figure (without the extension).
-        The figures are saved in the "Figuras" subdirectory.
+    :param sFigName: desired file name of the saved figure. The figures are saved in the "Figuras" subdirectory.
+    :param bPureLinkages: boolean; pure linkages? Required because the classification of key sectors is different.
     :param nTextLimit: minimal distance to origin that a point has to have in order for the sector's name to be plotted
     :param PointColor: color(s) (string or list of length nSectors) to fill the bars. Defaults to black.
     :return: Nothing; saves the plot (in pdf) to the "Figuras" subdirectory.
@@ -410,10 +410,6 @@ def named_scatter_plot(x, y, inf_lim, sup_lim, sTitle, vLabels, sXTitle,
     ax.set_xlim(inf_lim, sup_lim)
     ax.set_ylim(inf_lim, sup_lim)
 
-    # Creating dashed horizontal and vertical lines at 1
-    plt.hlines(1, xmin=inf_lim, xmax=sup_lim, colors='black', linestyles='dashed')
-    plt.vlines(1, ymin=inf_lim, ymax=sup_lim, colors='black', linestyles='dashed')
-
     # Point Labels
     for i, txt in enumerate(vLabels):
         # if the point is too close to the origin, don't annotate
@@ -427,14 +423,24 @@ def named_scatter_plot(x, y, inf_lim, sup_lim, sTitle, vLabels, sXTitle,
     ax.set_xlabel(sXTitle, fontsize=10)
     ax.set_ylabel(sYTitle, fontsize=10)
 
-    ## Annotating Quadrants
-    plt.figtext(0.13, 0.85, "Forte encadeamento para trás", wrap=True, horizontalalignment='left', fontsize=11)
-    plt.figtext(0.78, 0.85, "Setor-Chave", wrap=True, horizontalalignment='left', fontsize=11)
-    plt.figtext(0.58, 0.12, "Forte encadeamento para frente", wrap=True, horizontalalignment='left', fontsize=11)
+    ## Creating lines and annotating quadrants
+    # Pure Linkages
+    if bPureLinkages:
+        # Creating line that determines key sectors (PTLN = (PFLN + PBLN)/2 > 1, i.e., y > 2 - x)
+        x_line = np.linspace(0, 2, 10)
+        y_line = 2 - x_line
+        ax.plot(x_line, y_line, color='black', linestyle='dashed')
 
-    # For 12 sectors
-    if len(vLabels) < 20:
-        plt.figtext(0.13, 0.12, "Fraco encadeamento", wrap=True, horizontalalignment='left', fontsize=11)
+    # Traditional Linkages
+    else:
+        # Creating dashed horizontal and vertical lines at 1
+        plt.hlines(1, xmin=inf_lim, xmax=sup_lim, colors='black', linestyles='dashed')
+        plt.vlines(1, ymin=inf_lim, ymax=sup_lim, colors='black', linestyles='dashed')
+
+        # Annotating Quadrants
+        plt.figtext(0.13, 0.85, "Forte Encadeamento para Trás", wrap=True, horizontalalignment='left', fontsize=11)
+        plt.figtext(0.78, 0.85, "Setor-Chave", wrap=True, horizontalalignment='left', fontsize=11)
+        plt.figtext(0.58, 0.1125, "Forte Encadeamento para Frente", wrap=True, horizontalalignment='left', fontsize=11)
 
     # Saving graph
     sFileName = f"Output/Figuras_{len(vLabels)}/" + sFigName + ".pdf"
@@ -724,6 +730,52 @@ def calc_multipliers(vInput, vProduction, mDirectCoef, mLeontief_open, mLeontief
     mMultipliers = np.vstack((vSectors, h, M, MI, MT, MII, DirectEffects, IndirectEffects, InducedEffects)).T
 
     return mMultipliers
+
+def linkages(mLeontief, mGhosh, vColNames, nSectors, vSectors):
+    """
+    Calculates linkage indicators (backwards and forwards in Ghosh's and Leontief's models).
+    :param mLeontief: Leontief matrix (see leontief_open);
+    :param mGhosh: Ghosh's matrix (see ghosh_supply);
+    :param vColNames: list containing column names;
+    :param nSectors: integer containing number of sectors;
+    :param vSectors: vector containing sector's names.
+    :return: mIndLig: numpy array with
+    """
+
+    ## Meaning across lines (get column totals) in Leontief's matrix: backwards linkages
+    # Indices show how much other sector's have to produce in order to meet a rise of 1 unit in sector's j final demand
+    nBL_Bar = np.mean(mLeontief, axis=0)
+
+    ## Adding across columns (get row/line totals) in Leontief's matrix: forward linkages
+    # Indices show how much sector i has to produce in order to meet a rise of 1 in final demand of the whole economy
+    nFL_Bar = np.mean(mLeontief, axis=1)
+
+    ## Mean of all indirect and direct technical coefficients
+    nMT = np.sum(mLeontief) / nSectors ** 2
+
+    ## Backwards-Looking Index (Uj)
+    BL = nBL_Bar / nMT
+    ## Forward-Looking Index (Ui)
+    FL = nFL_Bar / nMT
+
+    ## Using Ghosh's matrix (supply-side model)
+    MLG = np.mean(mGhosh, axis=1)
+    G_star = np.sum(mGhosh) / nSectors ** 2
+    FLG = MLG / G_star
+
+    ## Joining all indices
+    mIndLig = np.vstack((vSectors, BL, FL, FLG)).T
+
+    ## Checking key sectors
+    # Transforming into a dataframe
+    dfIndLig = pd.DataFrame(mIndLig, columns=vColNames)
+    dfIndLig['Setores-Chave'] = np.where(
+        (dfIndLig['Para Trás'] >= 1) & (dfIndLig['Para Frente Ghosh'] >= 1),
+        "Setor-Chave",
+        "-"
+    )
+
+    return dfIndLig.to_numpy()
 
 def calc_ipl(vDemand, mA, vSectors, nSectors):
     """
