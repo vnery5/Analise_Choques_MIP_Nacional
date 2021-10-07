@@ -1,6 +1,6 @@
 """
 Sectorial analysis based on estimated matrices by EstimaMIP_Nacional (every version).
-Based on Vale, Perobelli (2021).
+Based on: VALE, V. A.; PEROBELLI, F. S.. Análise de Insumo-Produto: teoria e aplicações no R. NEDUR/LATES, 2020.
 Authors: João Maria de Oliveira and Vinícius de Almeida Nery Ferreira (Ipea-DF).
 E-mails: joao.oliveira@ipea.gov.br and vinicius.nery@ipea.gov.br (or vnery5@gmail.com).
 """
@@ -483,16 +483,25 @@ if __name__ == '__main__':
         deltaDemand = np.reshape(deltaDemand, -1)
 
         ## Joining all into one table
+        # Reshaping production
+        mX1 = np.reshape(mX1, -1)
+        mX0 = np.reshape(mX0, -1)
+
+        # Column Names
         mDecomposition_Col_Names = ["Setor", "Var. Produção", "Var. Tecnológica", "Var. Demanda Final",
-                                    f"Índices de Preços da Produção Total {nYear}",
-                                    f"Índices de Preços da Produção Total {nYear_Decomp}"]
-        mDecomposition = np.vstack((vSectors1, deltaX, deltaTech, deltaDemand, mX_index1, mX_index0)).T
+                                    "", f"Produção {nYear}", f"Produção {nYear_Decomp}",
+                                    f"Índices de Preços Produção {nYear}", f"Índices de Preços Produção {nYear_Decomp}",
+                                    f"Índices de Preços Demanda {nYear}", f"Índices de Preços Demannda {nYear_Decomp}"]
+
+        # Table
+        mDecomposition = np.vstack((vSectors1, deltaX, deltaTech, deltaDemand, np.empty([nSectors1]),
+                                    mX1, mX0, mX_index1, mX_index0, mY_index1, mY_index0)).T
 
         # Getting Economy Total
         Total_Decomp = np.sum(mDecomposition, axis=0)
         Total_Decomp[0] = "Total"
-        Total_Decomp[[4, 5]] = "-"
-        Total_Decomp = np.reshape(Total_Decomp, (1, 6))
+        Total_Decomp[7:11] = "-"
+        Total_Decomp = np.reshape(Total_Decomp, (1, 11))
 
         # Appending to end of the table
         mDecomposition = np.concatenate((mDecomposition, Total_Decomp), axis=0)
@@ -602,8 +611,17 @@ if __name__ == '__main__':
     if saveFig:
         ## Creating color list and highlighting desired sector (if necessary)
         lColours = ["#595959"] * nSectors
+        lColours_Hypo = ["green"] * nSectors
+        lColours_DeltaProd = ["darkblue"] * nSectors1
+        lColours_DeltaDemand = ["darkred"] * nSectors1
+        lColours_DeltaTec = ["dodgerblue"] * nSectors1
+
         if bHighlightSectorFigs:
             lColours[nIndexHighlightSectorsFigs] = sHighlightColor
+            lColours_Hypo[nIndexHighlightSectorsFigs] = sHighlightColor
+            lColours_DeltaProd[nIndexHighlightSectorsFigs] = sHighlightColor
+            lColours_DeltaDemand[nIndexHighlightSectorsFigs] = sHighlightColor
+            lColours_DeltaTec[nIndexHighlightSectorsFigs] = sHighlightColor
 
         ## Abbreviating sectors names for graph labels (if necessary)
         # If < 68 sectors, abbreviate sectors; else, use sector's numbers
@@ -728,14 +746,14 @@ if __name__ == '__main__':
         Support.bar_plot(
             vData=mExtractions[:, 3], vXLabels=vSectors_Graph,
             sTitle=f"Perda de Produção por Extração Hipótetica - Estrutura de Compras (%) - {nYear}", sXTitle="Setores",
-            sFigName=f"Extr_Hipo_Compras_{nYear}", nY_Adjust=0.01, BarColor="green"
+            sFigName=f"Extr_Hipo_Compras_{nYear}", nY_Adjust=0.01, BarColor=lColours_Hypo
         )
         # FL % (production loss if the sector doesn't sell anything to the other economic sectors,
         # relative to total economic production)
         Support.bar_plot(
             vData=mExtractions[:, 4], vXLabels=vSectors_Graph,
             sTitle=f"Perda de Produção por Extração Hipótetica - Estrutura de Vendas (%) - {nYear}", sXTitle="Setores",
-            sFigName=f"Extr_Hipo_Vendas_{nYear}", nY_Adjust=0.01, BarColor="green"
+            sFigName=f"Extr_Hipo_Vendas_{nYear}", nY_Adjust=0.01, BarColor=lColours_Hypo
         )
 
         ## Influence matrix
@@ -749,19 +767,19 @@ if __name__ == '__main__':
                 vData=mDecomposition[:nSectors1, 1], vXLabels=vSectors_Graph1,
                 sTitle=f"Variação da Produção {nYear_Decomp} - {nYear} (R$ Milhões 2010)",
                 sXTitle="Setores", sFigName=f"Var_Prod_{nYear_Decomp}-{nYear}",
-                BarColor="darkblue", bAnnotate=False, nDirectory=nSectors
+                BarColor=lColours_DeltaProd, bAnnotate=False, nDirectory=nSectors
             )
             Support.bar_plot(
                 vData=mDecomposition[:nSectors1, 2], vXLabels=vSectors_Graph1,
                 sTitle=f"Decomposição - Variação Tecnológica {nYear_Decomp} - {nYear}",
                 sXTitle="Setores", sFigName=f"Var_Tecno_{nYear_Decomp}-{nYear}",
-                BarColor="darkred", bAnnotate=False, nDirectory=nSectors
+                BarColor=lColours_DeltaTec, bAnnotate=False, nDirectory=nSectors
             )
             Support.bar_plot(
                 vData=mDecomposition[:nSectors1, 3], vXLabels=vSectors_Graph1,
                 sTitle=f"Decomposição - Variação da Demanda Final {nYear_Decomp} - {nYear}",
                 sXTitle="Setores", sFigName=f"Var_DemFinal_{nYear_Decomp}-{nYear}",
-                BarColor="dodgerblue", bAnnotate=False, nDirectory=nSectors
+                BarColor=lColours_DeltaDemand, bAnnotate=False, nDirectory=nSectors
             )
 
     ### ============================================================================================
