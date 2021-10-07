@@ -34,7 +34,7 @@ if __name__ == '__main__':
 
     ## Highlight one sectors? If so, which index and color?
     bHighlightSectorFigs = True  # True or False
-    nIndexHighlightSectorsFigs = 3 if nDimension == 2 else 37  # 3 or 37: Electricity & Gas (base 0 index)
+    nIndexHighlightSectorsFigs = 3 if nDimension <= 2 else 37  # 3 or 37: Electricity & Gas (base 0 index)
     sHighlightColor = "red"
 
     ## Do a structural decomposition?
@@ -489,19 +489,19 @@ if __name__ == '__main__':
 
         # Column Names
         mDecomposition_Col_Names = ["Setor", "Var. Produção", "Var. Tecnológica", "Var. Demanda Final",
-                                    "", f"Produção {nYear}", f"Produção {nYear_Decomp}",
+                                    f"Produção {nYear}", f"Produção {nYear_Decomp}",
                                     f"Índices de Preços Produção {nYear}", f"Índices de Preços Produção {nYear_Decomp}",
-                                    f"Índices de Preços Demanda {nYear}", f"Índices de Preços Demannda {nYear_Decomp}"]
+                                    f"Índices de Preços Demanda {nYear}", f"Índices de Preços Demanda {nYear_Decomp}"]
 
         # Table
-        mDecomposition = np.vstack((vSectors1, deltaX, deltaTech, deltaDemand, np.empty([nSectors1]),
+        mDecomposition = np.vstack((vSectors1, deltaX, deltaTech, deltaDemand,
                                     mX1, mX0, mX_index1, mX_index0, mY_index1, mY_index0)).T
 
         # Getting Economy Total
         Total_Decomp = np.sum(mDecomposition, axis=0)
         Total_Decomp[0] = "Total"
-        Total_Decomp[7:11] = "-"
-        Total_Decomp = np.reshape(Total_Decomp, (1, 11))
+        Total_Decomp[7:10] = "-"
+        Total_Decomp = np.reshape(Total_Decomp, (1, 10))
 
         # Appending to end of the table
         mDecomposition = np.concatenate((mDecomposition, Total_Decomp), axis=0)
@@ -569,6 +569,9 @@ if __name__ == '__main__':
         vDataSheets.append(
             pd.DataFrame(mDecomposition[:, 1:], columns=mDecomposition_Col_Names[1:], index=mDecomposition_Index)
         )
+        # Year 0 MIP
+        vNameSheets.append(f"MIP{nYear_Decomp}")
+        vDataSheets.append(dfMIP0)
 
     # Direct coefficients (open model)
     vNameSheets.append("Coef_Diretos_Aberto (mA)")
