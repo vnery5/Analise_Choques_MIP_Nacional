@@ -21,7 +21,7 @@ if __name__ == '__main__':
     # 4: 68 sectors
     # 9: more than 68 sectors ("68+")
     # 0: other (specify number of sectors below)
-    nDimension = 2
+    nDimension = 4
 
     ## Year to be analyzed
     nYear = 2018
@@ -30,7 +30,7 @@ if __name__ == '__main__':
     bGuilhoto = True  # True or False
 
     ## Whether to create and save figures
-    saveFig = True  # True or False
+    saveFig = False  # True or False
 
     ## Highlight one sectors? If so, which index and color?
     bHighlightSectorFigs = True  # True or False
@@ -43,7 +43,7 @@ if __name__ == '__main__':
     nYear_Decomp = 2011
 
     ## Closed model methodology: use Guilhoto's (True) or Vale, Perobelli's (False)?
-    bClosedGuilhoto = True  # True or False
+    bClosedGuilhoto = False  # True or False
     # If bClosedGuilhoto, update added values components in output MIP?
     bUpdateMIPClosedGuilhoto = True
 
@@ -100,7 +100,7 @@ if __name__ == '__main__':
     mSP_FD = dfMIP.values[nSectors + 1:nSectors + 6, nSectors + 1:-2]
 
     ### ============================================================================================
-    ### Technical Coeficientes (Closed, Open and Supply)
+    ### Technical Coefficients (mA and mB) (Closed, Open and Supply)
     ### ============================================================================================
 
     ### Open Model
@@ -136,7 +136,7 @@ if __name__ == '__main__':
         hR = mR / mX
         hR = hR.T
 
-    ## Methodology proposed by Guilhoto (
+    ## Methodology proposed by Guilhoto
     # Idea: income = total consumption (usually < in TRUs and MIPs when working with only remuneration)
     else:
         ## Indicator for differentiation when saving spreadsheet
@@ -209,7 +209,7 @@ if __name__ == '__main__':
     Given an increase of 1 in the demand of sector j, how much output/production is generated in the economy?
     Considers not only the direct effects, but also the indirect ones (power series approximation).
     """
-    MP = np.sum(mB, axis=0)
+    vMP = np.sum(mB, axis=0)
 
     ## Total Production Multipliers (closed model)
     """
@@ -220,11 +220,10 @@ if __name__ == '__main__':
         - Direct effect (mA)
         - Indirect effect (mB - mA)
     """
-    MPT = np.sum(mB_closed[:, :nSectors], axis=0)
-    mInducedEffect = np.sum(mB_closed[:, :nSectors], axis=0) - np.sum(mB, axis=0)
-    mDirectEffect = np.sum(mA, axis=0)
-    mIndirectEffect = np.sum(mB, axis=0) - np.sum(mA, axis=0)
-    mTotalEffectOpenModel = mDirectEffect + mIndirectEffect
+    vMPT = np.sum(mB_closed[:, :nSectors], axis=0)
+    vInducedEffect = np.sum(mB_closed[:, :nSectors], axis=0) - np.sum(mB, axis=0)
+    vDirectEffect = np.sum(mA, axis=0)
+    vIndirectEffect = np.sum(mB, axis=0) - np.sum(mA, axis=0)
 
     ## Total Truncated Production Multipliers (closed model)
     """
@@ -233,8 +232,8 @@ if __name__ == '__main__':
     (but only considering the productive sectors; in other words, not considering
     the direct impact of household consumption on GDP, but only its induced effects)?
     """
-    MPTT = np.sum(mB_closed[:nSectors, :nSectors], axis=0)
-    mInducedEffectTrunc = np.sum(mB_closed[:nSectors, :nSectors], axis=0) - np.sum(mB, axis=0)
+    vMPTT = np.sum(mB_closed[:nSectors, :nSectors], axis=0)
+    vInducedEffectTrunc = np.sum(mB_closed[:nSectors, :nSectors], axis=0) - np.sum(mB, axis=0)
 
     ## Creating array with all multiplier names
     mProdMultipliers_Col_Names = [
@@ -242,7 +241,7 @@ if __name__ == '__main__':
         "Multiplicador Total de Produção Truncado", "Efeito Direto", "Efeito Indireto", "Efeito Induzido"
     ]
     ## Creating table with all multipliers
-    mProdMultipliers = np.vstack((vSectors, MP, MPT, MPTT, mDirectEffect, mIndirectEffect, mInducedEffect)).T
+    mProdMultipliers = np.vstack((vSectors, vMP, vMPT, vMPTT, vDirectEffect, vIndirectEffect, vInducedEffect)).T
 
     ### ============================================================================================
     ### Labor Multipliers
@@ -570,7 +569,7 @@ if __name__ == '__main__':
             pd.DataFrame(mDecomposition[:, 1:], columns=mDecomposition_Col_Names[1:], index=mDecomposition_Index)
         )
         # Year 0 MIP
-        vNameSheets.append(f"MIP{nYear_Decomp}")
+        vNameSheets.append(f"MIP_{nYear_Decomp}")
         vDataSheets.append(dfMIP0)
 
     # Direct coefficients (open model)
