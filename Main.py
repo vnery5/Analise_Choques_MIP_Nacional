@@ -19,9 +19,9 @@ if __name__ == '__main__':
     # 2: 20 sectors
     # 3: 51 sectors
     # 4: 68 sectors
-    # 9: more than 68 sectors ("68+")
+    # 9: more than 68 sectors ("68+") - Currently, programmed to read 72 sectors (disaggregation of education)
     # 0: other (specify number of sectors below)
-    nDimension = 4
+    nDimension = 0
 
     ## Year to be analyzed
     nYear = 2018
@@ -30,17 +30,17 @@ if __name__ == '__main__':
     bGuilhoto = True  # True or False
 
     ## Whether to create and save figures
-    saveFig = False  # True or False
+    saveFig = True  # True or False
 
     ## Highlight one sectors? If so, which index and color?
-    bHighlightSectorFigs = True  # True or False
+    bHighlightSectorFigs = False  # True or False
     nIndexHighlightSectorsFigs = 3 if nDimension <= 2 else 37  # 3 or 37: Electricity & Gas (base 0 index)
     sHighlightColor = "red"
 
     ## Do a structural decomposition?
-    doStructure = True  # True or False
+    doStructure = False  # True or False
     # Year to be compared in the structural decomposition
-    nYear_Decomp = 2011
+    nYear_Decomp = 2015
 
     ## Closed model methodology: use Guilhoto's (True) or Vale, Perobelli's (False)?
     bClosedGuilhoto = False  # True or False
@@ -51,7 +51,7 @@ if __name__ == '__main__':
 
     ### Defining file paths and names
     if nDimension == 0:
-        nSectorsFile = 67  # How many sectors?
+        nSectorsFile = 69  # How many sectors?
         invalidSectorNumber = ""
     elif nDimension == 9:
         nSectorsFile = "68+"
@@ -614,16 +614,18 @@ if __name__ == '__main__':
         ## Creating color list and highlighting desired sector (if necessary)
         lColours = ["#595959"] * nSectors
         lColours_Hypo = ["green"] * nSectors
-        lColours_DeltaProd = ["darkblue"] * nSectors1
-        lColours_DeltaDemand = ["darkred"] * nSectors1
-        lColours_DeltaTec = ["dodgerblue"] * nSectors1
+        if doStructure:
+            lColours_DeltaProd = ["darkblue"] * nSectors1
+            lColours_DeltaDemand = ["darkred"] * nSectors1
+            lColours_DeltaTec = ["dodgerblue"] * nSectors1
 
         if bHighlightSectorFigs:
             lColours[nIndexHighlightSectorsFigs] = sHighlightColor
             lColours_Hypo[nIndexHighlightSectorsFigs] = sHighlightColor
-            lColours_DeltaProd[nIndexHighlightSectorsFigs] = sHighlightColor
-            lColours_DeltaDemand[nIndexHighlightSectorsFigs] = sHighlightColor
-            lColours_DeltaTec[nIndexHighlightSectorsFigs] = sHighlightColor
+            if doStructure:
+                lColours_DeltaProd[nIndexHighlightSectorsFigs] = sHighlightColor
+                lColours_DeltaDemand[nIndexHighlightSectorsFigs] = sHighlightColor
+                lColours_DeltaTec[nIndexHighlightSectorsFigs] = sHighlightColor
 
         ## Abbreviating sectors names for graph labels (if necessary)
         # If < 68 sectors, abbreviate sectors; else, use sector's numbers
