@@ -113,6 +113,7 @@ def read_estimated_mip(sFileMIP, sSheetName="MIP"):
     vRowNames = np.array(dfMIP.index)
 
     ## Getting number of sectors and sectors names
+    # Logic: find index of total Intermediate Consumption column
     try:
         nSectors = dfMIP.columns.get_loc("Total de Consumo Intermediário")
     except KeyError:
