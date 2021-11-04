@@ -466,34 +466,22 @@ def influence_matrix_graph(mInfluence, vSectors, nSectors, sTitle, sFigName):
     # Printing Start
     print(f"Starting influence matrix graphs... ({datetime.datetime.now()})")
 
-    ## Getting mean and standard deviation
-    mean_Inf = np.mean(mInfluence)
-    std_Inf = np.std(mInfluence, ddof=1)
+    ## Getting mean and standard deviation (with one less degree of freedom)
+    nMeanInfluence = np.mean(mInfluence)
+    nSTDInfluence = np.std(mInfluence, ddof=1)
 
-    ## Creating new column to facilitate visualization
-    situation_Inf = np.zeros([nSectors, nSectors], dtype=float)
-    for r in range(nSectors):
-        for c in range(nSectors):
-            situation_Inf[r, c] = np.where(
-                mInfluence[r, c] < mean_Inf,
-                0,
-                np.where(
-                    mInfluence[r, c] < mean_Inf + std_Inf,
-                    1,
-                    np.where(
-                        mInfluence[r, c] < mean_Inf + 2*std_Inf,
-                        2,
-                        3
-                    )
-                )
-            )
+    ## Creating categorized matrix
+    mCategoriesInfluence = np.where(mInfluence < nMeanInfluence, 1,
+                                    np.where(mInfluence < nMeanInfluence + nSTDInfluence, 2,
+                                             np.where(mInfluence < nMeanInfluence + 2*nSTDInfluence, 3, 4)))
 
-    labels = ["< Média", "< Média + DP", "< Média + 2DP", "> Média + 2DP"]
+    labels = ["Menor que a Média", "Entre a Média\ne a Média + DP",
+              "Entre a Média + DP\ne a Média + 2DP", "Maior que a\nMédia + 2DP"]
 
     ### Creating a heatmap plot - continuous values
     ## Creating fig object
     # Determining size based on the number of sectors
-    tupleFigSize = (6, 6) if nSectors <= 20 else (10, 10)
+    tupleFigSize = (6, 6) if nSectors < 67 else (10, 10)
     nRotation = 45 if nSectors < 20 else 90
 
     # Creating fig object
@@ -529,11 +517,11 @@ def influence_matrix_graph(mInfluence, vSectors, nSectors, sTitle, sFigName):
     fig_disc, ax = plt.subplots(figsize=tupleFigSize)
 
     ## Creating heatmap
-    sns.heatmap(situation_Inf, cmap=["#FFFFFF", "#CDCDCD", "#737373", "#000000"], annot=False)
+    sns.heatmap(mCategoriesInfluence, cmap=["#FFFFFF", "#CDCDCD", "#737373", "#000000"], annot=False)
 
     # Creating discrete colorbar
     cbar = ax.collections[0].colorbar
-    cbar.set_ticks([0, 1, 2, 3])
+    cbar.set_ticks([1.375, 2.125, 2.876, 3.625])
     cbar.set_ticklabels(labels)
     cbar.ax.tick_params(labelsize=8)
 
@@ -786,80 +774,68 @@ def calc_ipl(vDemand, mA, vSectors, nSectors):
     :param nSectors: number of sectors
     :param vSectors: vector containing sector's names
     :return:
-        IPL: matrix containing all of the pure indexes (backwards, forwards and total)
-        IPLNorm: matrix containing all of the normalized indexes (IPL divided by the the indicator's mean)
+        mIPL: matrix containing all of the pure indexes (backwards, forwards and total)
+        IPLNorm: matrix containing all of the normalized indexes (mIPL divided by the the indicator's mean)
     """
 
-    ## Creating list in order to help with slicing
-    truth = [True] * nSectors
-
     ## Creating array to store the components
-    IPL = np.zeros([nSectors, 3], dtype=float)
+    mIPL = np.zeros([nSectors, 3], dtype=float)
 
     ## Reshaping demand array (from 1D matrix to vector)
     vDemand = np.reshape(vDemand, -1)
 
-    ## creating GHS indices; for info, see Vale, Perobelli, 2020, p. 91-93
-    # As there is a matrix composition (see eq.39), we use three loops
-    # With the three ifs, we can be sure to calculate Ajj correctly
+    ## Creating GHS indices; for info, see Vale, Perobelli, 2020, p. 91-93
     for s in range(nSectors):
-        for i in range(nSectors):
-            for j in range(nSectors):
-                if s == i:
-                    if i == j:  # Ajj area
-                        # Boolean array to determine which sectors are the "rest of the economy"
-                        # (sector i = j = s -> False)
-                        other_sectors = np.array(truth)
-                        other_sectors[i] = False
-                        # Demand of sector j and of the rest of the economy
-                        yj = vDemand[i]
-                        yr = vDemand[other_sectors]
+        # Mask to help with slicing
+        lRestEconomy = [True] * nSectors
+        lRestEconomy[s] = False
 
-                        # Direct technical coefficient of sector i = j with respect to itself
-                        Ajj = mA[i, j]
-                        # Indirect and direct technical coefficient of sector i = j with respect to itself
-                        DJ = 1 / (1 - Ajj)
+        # Demand of sector j and of the rest of the economy
+        yj = vDemand[s]
+        yr = vDemand[lRestEconomy]
 
-                        # Direct technical coefficients of inputs bought by sector i=j=s from the rest of the economy
-                        Ajr = mA[i, other_sectors]
-                        # Direct coefficients of inputs bought by the rest of the economy from sector i=j=s
-                        Arj = mA[other_sectors, j]
-                        # Direct technical coefficients of the rest of the economy
-                        # np.ix_: allows us to select a specified subset of rows and columns
-                        Arr = mA[np.ix_(other_sectors, other_sectors)]
+        # Direct technical coefficient of sector i == j with respect to itself
+        Ajj = mA[s, s]
+        # Indirect and direct technical coefficient of sector i = j with respect to itself (Leontief)
+        DJ = 1 / (1 - Ajj)
 
-                        # Leontief matrix considering only the rest of the economy
-                        mI = np.eye(nSectors - 1)
-                        DR = np.linalg.inv(mI - Arr)
+        # Direct technical coefficients of inputs bought by sector i=j=s from the rest of the economy
+        Ajr = mA[s, lRestEconomy]
+        # Direct coefficients of inputs bought by the rest of the economy from sector i=j=s
+        Arj = mA[lRestEconomy, s]
+        # Direct technical coefficients of the rest of the economy
+        # np.ix_: allows us to select a specified subset of rows and columns
+        Arr = mA[np.ix_(lRestEconomy, lRestEconomy)]
 
-                        # PBL Indicator: impact of production of sector j upon the production of the rest of the economy
-                        # excluding self-demand for inputs and the return of other economic sectors to sector i=j=s
-                        PBL = np.sum(np.dot(DR, Arj).dot(DJ).dot(yj))
-                        # PFL indicator: impact of the production of the rest of the economy upon sector i=j=s
-                        PFL = np.sum(np.dot(DJ, Ajr).dot(DR).dot(yr))
-                        # Creating total index (PTL Indicator) to check which sectors are the most dynamic
-                        PTL = PBL + PFL
+        # Leontief matrix considering only the rest of the economy
+        mI = np.eye(nSectors - 1)
+        DR = np.linalg.inv(mI - Arr)
 
-                        # Putting all indicators in an array to be added to an aggregated table
-                        IPuros = np.array([PBL, PFL, PTL])
+        # PBL Indicator: impact of production of sector j upon the production of the rest of the economy
+        # excluding self-demand for inputs and the return of other economic sectors to sector i=j=s
+        PBL = np.sum(np.dot(DR, Arj).dot(DJ).dot(yj))
+        # PFL indicator: impact of the production of the rest of the economy upon sector i=j=s
+        PFL = np.sum(np.dot(DJ, Ajr).dot(DR).dot(yr))
+        # Creating total index (PTL Indicator) to check which sectors are the most dynamic
+        PTL = PBL + PFL
 
-        ## adding calculated indices to the aggregated table (one line for every sector)
-        IPL[s, :] = IPuros
+        # Putting all indicators in an array and adding to the table
+        mIPL[s, :] = np.array([PBL, PFL, PTL])
 
     ## Normalizing indexes
     # dividing each sector's index by the mean index of the economy to see which are the most important
     # If > 1, the sector is key to the rest of the economy, even when taking in consideration its level of production
-    IPLmean = np.mean(IPL, axis=0)
+    vIPLmean = np.mean(mIPL, axis=0)
     # Dividing all indicators by that indicator's mean
-    IPLNorm = IPL / IPLmean[None, :]  # equivalent to IPL.dot(np.diagflat(1 / IPLmean), where diagflat produces a 3x3)
+    IPLNorm = mIPL / vIPLmean[None, :]  # equivalent to mIPL.dot(np.diagflat(1/vIPLmean), where diagflat produces a 3x3)
 
     ## Adding sectors names
-    # Changing sector names vector to 1D matrix and concatenating with the IPL and IPLNorm tables
+    # Changing sector names vector to 1D matrix and concatenating with the mIPL and IPLNorm tables
     vSectors = np.reshape(vSectors, (nSectors, 1))
-    IPL = np.concatenate((vSectors, IPL), axis=1)
+    mIPL = np.concatenate((vSectors, mIPL), axis=1)
     IPLNorm = np.concatenate((vSectors, IPLNorm), axis=1)
 
-    return IPL, IPLNorm
+    return mIPL, IPLNorm
 
 def influence_matrix(mA, nIncrement, nSectors):
     """
