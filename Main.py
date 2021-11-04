@@ -143,7 +143,7 @@ if __name__ == '__main__':
         hR = hR.T
 
     ## Methodology proposed by Guilhoto
-    # Idea: income = total consumption (usually < in TRUs and MIPs when working with only remuneration)
+    # Idea: income = total consumption (usually < in TRUs and MIPs when working only with remunerations)
     else:
         ## Indicator for differentiation when saving spreadsheet
         sClosedGuilhotoIndicator = "_Closed_Guilhoto"
@@ -163,8 +163,8 @@ if __name__ == '__main__':
 
         ## Finding consumption and total income under Guilhoto
         mC_Guilhoto, mR_Guilhoto, mEOB_Guilhoto, nTotalConsumption = \
-            Support.open_model_guilhoto(mFinalDemand_Import_Taxes, mAddedValue, nSectors, nColISFLSFConsumption,
-                                        nColFamilyConsumption, nRowRemunerations, nRowRM, nRowEOB)
+            Support.closed_model_guilhoto(mFinalDemand_Import_Taxes, mAddedValue, nSectors, nColISFLSFConsumption,
+                                          nColFamilyConsumption, nRowRemunerations, nRowRM, nRowEOB)
 
         ## Calculating coefficients
         hC = mC_Guilhoto / nTotalConsumption

@@ -325,7 +325,7 @@ def bar_plot(vData, vXLabels, sTitle, sXTitle, sFigName,
 
     ## Creating fig object
     # Determining size based on the number of sectors
-    tupleFigSize = (8, 4) if len(vXLabels) <= 20 else (12, 6)
+    tupleFigSize = (8, 4) if len(vXLabels) < 67 else (12, 6)
 
     # Creating fig object
     fig, ax = plt.subplots(figsize=tupleFigSize)
@@ -571,8 +571,8 @@ def leontief_open(mIC, vProduction, nSectors):
 
     return mA, mLeontief
 
-def open_model_guilhoto(mFinalDemand, mAddedValue, nSectors, nColISFLSFConsumption, nColFamilyConsumption,
-                        nRowRemunerations, nRowRM, nRowEOB):
+def closed_model_guilhoto(mFinalDemand, mAddedValue, nSectors, nColISFLSFConsumption, nColFamilyConsumption,
+                          nRowRemunerations, nRowRM, nRowEOB):
     """
     Adds up both types of consumption and, using mixed and capital income, fixes remunerations
     in order that the identity income = consumption is now True
