@@ -279,6 +279,8 @@ def abbreviate_sectors_names(vSectors):
             new_name = "Saúde"
         elif name.startswith("Artes"):
             new_name = "Artes"
+        elif name.startswith("Atividades artísticas"):
+            new_name = "Artes"
         elif name.startswith("Outras atividades"):
             new_name = "Outros\nServ."
         elif name == "Serviços domésticos":
@@ -295,6 +297,10 @@ def abbreviate_sectors_names(vSectors):
             new_name = "Educ.\nPriv. (EM)"
         elif name == "Educação privada - Ensino Superior":
             new_name = "Educ.\nPriv. (ES)"
+        elif name.startswith("Armazenamento"):
+            new_name = "Armazenamento\nCorreio"
+        elif name.startswith("Organizações associativas"):
+            new_name = "Org. Assosciativas"
         else:
             new_name = name
 
