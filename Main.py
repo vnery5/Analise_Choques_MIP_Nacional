@@ -26,20 +26,20 @@ if __name__ == '__main__':
     # 4: 68 sectors
     # 9: more than 68 sectors ("68+") - Currently, programmed to read 72 sectors (disaggregation of education)
     # 0: other (specify number of sectors below)
-    nDimension = 4
+    nDimension = 2
 
     ## Year to be analyzed
-    nYear = 2018
+    nYear = 2019
     
     ## Use MIPs estimated under Guilhoto (2010) or Alves-Passoni, Freitas (APF) (2020)?
     # If decided to use APF's matrices, remember to specify nDimension = 0 and nSectorsFile = 67 on line 60
-    bGuilhoto = True  # True or False
+    bGuilhoto = False  # True or False
 
     ## Whether to create and save figures
-    saveFig = True  # True or False
+    saveFig = False  # True or False
 
     ## Highlight one sectors? If so, which index and color?
-    bHighlightSectorFigs = False  # True or False
+    bHighlightSectorFigs = True  # True or False
     nIndexHighlightSectorsFigs = 3 if nDimension <= 2 else 37  # 3 or 37: Electricity & Gas (base 0 index)
     sHighlightColor = "red"
 
@@ -49,7 +49,7 @@ if __name__ == '__main__':
     nYear_Decomp = 2015
 
     ## Closed model methodology: use Guilhoto's (True) or Vale, Perobelli's (False)?
-    bClosedGuilhoto = False  # True or False
+    bClosedGuilhoto = True  # True or False
     # If bClosedGuilhoto, update added values components in output MIP?
     bUpdateMIPClosedGuilhoto = True
 

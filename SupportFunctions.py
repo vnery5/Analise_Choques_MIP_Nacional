@@ -1,9 +1,5 @@
 """
 Auxiliary functions for Main.py (in order to keep the main code clean).
-Sectorial analysis based on estimated matrices by EstimaMIP_Nacional (every versions).
-Based on Vale, Perobelli (2021).
-Authors: João Maria de Oliveira and Vinícius de Almeida Nery Ferreira (Ipea-DF).
-E-mails: joao.oliveira@ipea.gov.br and vinicius.nery@ipea.gov.br (or vnery5@gmail.com).
 """
 
 ## Import necessary libraries
@@ -247,7 +243,7 @@ def abbreviate_sectors_names(vSectors):
             new_name = "Ind\nTransf."
         elif name.startswith("Eletricidade e gás,"):
             new_name = "SIUP"
-        elif name.startswith("Eletricidade e gás"):
+        elif name.startswith("Eletricidade e gás") or name.startswith("Energia elétrica, gás"):
             new_name = "Eletr.\nGás"
         elif name.startswith("Água"):
             new_name = "Água"
