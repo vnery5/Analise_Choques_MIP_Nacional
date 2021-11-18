@@ -231,6 +231,7 @@ def abbreviate_sectors_names(vSectors):
     :return:
         vSectorsGraph: vector with the abbreviated sectors
     """
+
     # Creating empty list
     vSectors_Graph = []
     # Chained ifs
@@ -266,7 +267,7 @@ def abbreviate_sectors_names(vSectors):
         elif name.startswith("Atividades adm"):
             new_name = "Ativ.\nAdmin."
         elif name.startswith("Administração"):
-            new_name = "Adm.\nPública"
+            new_name = "Adm.\nPúb."
         elif name == "Educação":
             new_name = "Educ."
         elif name == "Educação Básica":
@@ -277,7 +278,11 @@ def abbreviate_sectors_names(vSectors):
             new_name = "Artes"
         elif name.startswith("Atividades artísticas"):
             new_name = "Artes"
+        elif name == "Outras atividades industriais":
+            new_name = "Outras\nIndústr."
         elif name.startswith("Outras atividades"):
+            new_name = "Outros\nServ."
+        elif name.startswith("Outros serviços"):
             new_name = "Outros\nServ."
         elif name == "Serviços domésticos":
             new_name = "Serv.\nDom."
@@ -294,16 +299,34 @@ def abbreviate_sectors_names(vSectors):
         elif name == "Educação privada - Ensino Superior":
             new_name = "Educ.\nPriv. (ES)"
         elif name.startswith("Armazenamento"):
-            new_name = "Armazenamento\nCorreio"
+            new_name = "Armaz.\nCorreio"
         elif name.startswith("Organizações associativas"):
-            new_name = "Org. Assosciativas"
+            new_name = "Org.\nassociativas"
+        elif name == "Fabricação de alimentos e bebidas":
+            new_name = "Fabr.\nAlim.\nBeb."
+        elif name.startswith("Têxteis"):
+            new_name = "Têxteis"
+        elif name == "Fabricação de madeira, celulose e produtos de papel":
+            new_name = "Madeira\nPapel"
+        elif name == "Refino de petróleo, coquerias e biocombustíveis":
+            new_name = "Refino\nPetr."
+        elif name.startswith("Químicos"):
+            new_name = "Químicos"
+        elif name.startswith("Metalurgia"):
+            new_name = "Meta-\nlurgia"
+        elif name == "Equipamentos eletroeletrônicos e mecânicos":
+            new_name = "Equip.\nEletr.\nMec."
+        elif name == "Fabricação de automóveis e peças":
+            new_name = "Auto.\nPeças"
+        elif name == "Serviços prestados às empresas":
+            new_name = "Serv.\nEmpresas"
         else:
             new_name = name
 
         ## Appending new name to abbreviated sector's list
         vSectors_Graph.append(new_name)
 
-    return vSectors_Graph
+    return np.array(vSectors_Graph)
 
 def bar_plot(vData, vXLabels, sTitle, sXTitle, sFigName,
              nY_Adjust=0.001, BarColor="#595959", bMean=False, bAnnotate=True, nDirectory=None):
@@ -327,7 +350,7 @@ def bar_plot(vData, vXLabels, sTitle, sXTitle, sFigName,
 
     ## Creating fig object
     # Determining size based on the number of sectors
-    tupleFigSize = (8, 4) if len(vXLabels) < 67 else (12, 6)
+    tupleFigSize = (8, 4) if len(vXLabels) <= 20 else (12, 6)
 
     # Creating fig object
     fig, ax = plt.subplots(figsize=tupleFigSize)
@@ -388,7 +411,7 @@ def named_scatter_plot(x, y, inf_lim, sup_lim, sTitle, vLabels, sXTitle, sYTitle
     :param sYTitle: string containing the title for the y axis
     :param sFigName: desired file name of the saved figure. The figures are saved in the "Figuras" subdirectory.
     :param bPureLinkages: boolean; pure linkages? Required because the classification of key sectors is different.
-    :param nTextLimit: minimal distance to origin that a point has to have in order for the sector's name to be plotted
+    :param nTextLimit: minimal distance to (1, 1) that a point has to have in order for the sector's name to be plotted
     :param PointColor: color(s) (string or list of length nSectors) to fill the bars. Defaults to black.
     :return: Nothing; saves the plot (in pdf) to the "Figuras" subdirectory.
     """

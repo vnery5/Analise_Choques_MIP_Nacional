@@ -26,7 +26,7 @@ if __name__ == '__main__':
     # 4: 68 sectors
     # 9: more than 68 sectors ("68+") - Currently, programmed to read 72 sectors (disaggregation of education)
     # 0: other (specify number of sectors below)
-    nDimension = 2
+    nDimension = 0
 
     ## Year to be analyzed
     nYear = 2019
@@ -36,11 +36,11 @@ if __name__ == '__main__':
     bGuilhoto = False  # True or False
 
     ## Whether to create and save figures
-    saveFig = False  # True or False
+    saveFig = True  # True or False
 
     ## Highlight one sectors? If so, which index and color?
     bHighlightSectorFigs = True  # True or False
-    nIndexHighlightSectorsFigs = 3 if nDimension <= 2 else 37  # 3 or 37: Electricity & Gas (base 0 index)
+    nIndexHighlightSectorsFigs = 11  # 3 or 37: Electricity & Gas (base 0 index)
     sHighlightColor = "red"
 
     ## Do a structural decomposition?
@@ -57,7 +57,7 @@ if __name__ == '__main__':
 
     ### Defining file paths and names
     if nDimension == 0:
-        nSectorsFile = 67  # How many sectors?
+        nSectorsFile = 25  # How many sectors?
         invalidSectorNumber = ""
     elif nDimension == 9:
         nSectorsFile = "68+"
@@ -634,8 +634,8 @@ if __name__ == '__main__':
                 lColours_DeltaTec[nIndexHighlightSectorsFigs] = sHighlightColor
 
         ## Abbreviating sectors names for graph labels (if necessary)
-        # If < 68 sectors, abbreviate sectors; else, use sector's numbers
-        if nSectors < 68:
+        # If < 67 sectors, abbreviate sectors; else, use sector's numbers
+        if nSectors < 67:
             vSectors_Graph = Support.abbreviate_sectors_names(vSectors)
         else:
             vSectors_Graph = np.arange(1, nSectors + 1).astype(str)
@@ -735,7 +735,7 @@ if __name__ == '__main__':
         # Traditional (HR)
         Support.named_scatter_plot(
             x=mIndLig[:, 3], y=mIndLig[:, 1],
-            inf_lim=0.5, sup_lim=1.5 if nSectors <= 20 else 2,
+            inf_lim=0.5, sup_lim=1.5 if nSectors <= 20 else 2, nTextLimit=0.25,
             sTitle=f"Índices de Ligação e Setores-Chave - {nYear}",
             sXTitle="Índice de Ligação para Frente  - Matriz de Ghosh", sYTitle="Índice de Ligação para Trás",
             vLabels=vSectors_Graph,  sFigName=f"Ind_Lig_{nYear}", PointColor=lColours, bPureLinkages=False
