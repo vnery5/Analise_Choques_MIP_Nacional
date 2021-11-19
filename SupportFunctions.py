@@ -442,7 +442,7 @@ def named_scatter_plot(x, y, inf_lim, sup_lim, sTitle, vLabels, sXTitle, sYTitle
         if (abs(1 - x[i])**2 + abs(1 - y[i])**2)**0.5 > 1.41*nTextLimit:
             if "\n" in txt:  # replace new lines with spaces
                 txt = txt.replace("\n", " ")
-            ax.annotate(txt, (x[i] + 0.012, y[i] - 0.012))
+            ax.annotate(txt, (x[i] + 0.02, y[i] - 0.012))
 
     # Titles and Captions
     ax.set_title(sTitle, fontsize=12)
@@ -469,7 +469,7 @@ def named_scatter_plot(x, y, inf_lim, sup_lim, sTitle, vLabels, sXTitle, sYTitle
         plt.figtext(0.58, 0.1125, "Forte Encadeamento para Frente", wrap=True, horizontalalignment='left', fontsize=11)
 
     # Saving graph
-    sFileName = f"Output/Figuras_{len(vLabels)}/" + sFigName + ".pdf"
+    sFileName = f"Output/Figuras_{len(vLabels)}/{sFigName}.pdf"
     fig.savefig(sFileName, dpi=600, bbox_inches="tight")
 
 def influence_matrix_graph(mInfluence, vSectors, nSectors, sTitle, sFigName):

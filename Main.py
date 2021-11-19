@@ -26,7 +26,7 @@ if __name__ == '__main__':
     # 4: 68 sectors
     # 9: more than 68 sectors ("68+") - Currently, programmed to read 72 sectors (disaggregation of education)
     # 0: other (specify number of sectors below)
-    nDimension = 0
+    nDimension = 4
 
     ## Year to be analyzed
     nYear = 2019
@@ -35,12 +35,13 @@ if __name__ == '__main__':
     # If decided to use APF's matrices, remember to specify nDimension = 0 and nSectorsFile = 67 on line 60
     bGuilhoto = True  # True or False
 
-    ## Whether to create and save figures
-    saveFig = True  # True or False
+    ## Whether to create and save figures and write spreadsheet
+    bSaveFig = True  # True or False
+    bWriteExcel = True  # True or False
 
     ## Highlight one sectors? If so, which index and color?
     bHighlightSectorFigs = True  # True or False
-    nIndexHighlightSectorsFigs = 11  # 3 or 37: Electricity & Gas (base 0 index)
+    nIndexHighlightSectorsFigs = 37  # 3 or 37: Electricity & Gas (base 0 index)
     sHighlightColor = "red"
 
     ## Do a structural decomposition?
@@ -88,14 +89,14 @@ if __name__ == '__main__':
     sSheetNameMIP = "MIP"
 
     ## Figure Indicator
-    saveFigIndicator = " (WITH figures)..." if saveFig else " (WITHOUT figures)..."
+    bSaveFigIndicator = " (WITH figures)..." if bSaveFig else " (WITHOUT figures)..."
 
     ### ============================================================================================
 
     ### Print start
     sTimeBegin = datetime.datetime.now()
     print("======================= INPUT OUTPUT INDICATORS - VERSION 2 =======================")
-    print(f"Starting for year = {nYear} and dimension = {nDimension}{saveFigIndicator} ({sTimeBegin})")
+    print(f"Starting for year = {nYear} and dimension = {nDimension}{bSaveFigIndicator} ({sTimeBegin})")
     print(invalidSectorNumber)
 
     ## Read necessary matrices and get number of sectors and sector's names
@@ -516,107 +517,110 @@ if __name__ == '__main__':
     ### Exporting table to Excel
     ### ============================================================================================
 
-    print(f"Writing Excel file... ({datetime.datetime.now()})")
+    if bWriteExcel:
+        print(f"Writing Excel file... ({datetime.datetime.now()})")
 
-    # Original Input-Output Matrix
-    vNameSheets = ["MIP_Original"]
-    vDataSheets = [dfMIP]
+        # Original Input-Output Matrix
+        vNameSheets = ["MIP_Original"]
+        vDataSheets = [dfMIP]
 
-    # Guilhoto's Open Model Matrix (if requested)
-    if bClosedGuilhoto and bUpdateMIPClosedGuilhoto:
-        vNameSheets.append("MIP_ClosedGuilhoto")
-        vDataSheets.append(dfMIP_ClosedGuilhoto)
+        # Guilhoto's Open Model Matrix (if requested)
+        if bClosedGuilhoto and bUpdateMIPClosedGuilhoto:
+            vNameSheets.append("MIP_ClosedGuilhoto")
+            vDataSheets.append(dfMIP_ClosedGuilhoto)
 
-    # Production Multipliers
-    vNameSheets.append("Mult_Prod")
-    vDataSheets.append(pd.DataFrame(mProdMultipliers[:, 1:], columns=mProdMultipliers_Col_Names[1:], index=vSectors))
-
-    # Employment/Labor Multipliers
-    vNameSheets.append("Mult_Trab")
-    vDataSheets.append(pd.DataFrame(mEmpMultipliers[:, 1:], columns=mEmpMultipliers_Col_Names[1:], index=vSectors))
-
-    # Income Multipliers
-    vNameSheets.append("Mult_Renda")
-    vDataSheets.append(
-        pd.DataFrame(mIncomeMultipliers[:, 1:], columns=mIncomeMultipliers_Col_Names[1:], index=vSectors)
-    )
-
-    # Taxes Multipliers
-    vNameSheets.append("Mult_Imp")
-    vDataSheets.append(
-        pd.DataFrame(mTaxesMultipliers[:, 1:], columns=mTaxesMultipliers_Col_Names[1:], index=vSectors)
-    )
-
-    # Variance Coefficients
-    vNameSheets.append("Coef_Var")
-    vDataSheets.append(pd.DataFrame(mVarCoef[:, 1:], columns=mVarCoef_Col_Names[1:], index=vSectors))
-
-    # "Índices de Ligação" (HR Indices)
-    vNameSheets.append("Ind_Lig")
-    vDataSheets.append(pd.DataFrame(mIndLig[:, 1:], columns=mIndLig_Col_Names[1:], index=vSectors))
-
-    # "Índices de Ligação Puros Normalizados" (GHS Indices)
-    vNameSheets.append("Ind_Lig_Puros")
-    vDataSheets.append(pd.DataFrame(mIndPureLigNorm[:, 1:], columns=mIndPureLig_Col_Names[1:], index=vSectors))
-
-    # Influence Areas
-    vNameSheets.append("Campo_Influencia")
-    vDataSheets.append(pd.DataFrame(mInfluence, columns=vSectors, index=vSectors))
-
-    # Hypothetical Extractions
-    vNameSheets.append("Extr_Hip")
-    vDataSheets.append(pd.DataFrame(mExtractions[:, 1:], columns=mExtractions_Col_Names[1:], index=vSectors))
-
-    # Structural Decomposition
-    if doStructure:
-        # Results
-        vNameSheets.append(f"Decomp_Estrutural_{nYear}_{nYear_Decomp}")
+        # Production Multipliers
+        vNameSheets.append("Mult_Prod")
         vDataSheets.append(
-            pd.DataFrame(mDecomposition[:, 1:], columns=mDecomposition_Col_Names[1:], index=mDecomposition_Index)
+            pd.DataFrame(mProdMultipliers[:, 1:], columns=mProdMultipliers_Col_Names[1:], index=vSectors)
         )
-        # Year 0 MIP
-        vNameSheets.append(f"MIP_{nYear_Decomp}")
-        vDataSheets.append(dfMIP0)
 
-    # Direct coefficients (open model)
-    vNameSheets.append("Coef_Diretos_Aberto (mA)")
-    vDataSheets.append(pd.DataFrame(mA, columns=vSectors, index=vSectors))
+        # Employment/Labor Multipliers
+        vNameSheets.append("Mult_Trab")
+        vDataSheets.append(pd.DataFrame(mEmpMultipliers[:, 1:], columns=mEmpMultipliers_Col_Names[1:], index=vSectors))
 
-    # Leontief (open model)
-    vNameSheets.append("Leontief Aberto (mB)")
-    vDataSheets.append(pd.DataFrame(mB, columns=vSectors, index=vSectors))
+        # Income Multipliers
+        vNameSheets.append("Mult_Renda")
+        vDataSheets.append(
+            pd.DataFrame(mIncomeMultipliers[:, 1:], columns=mIncomeMultipliers_Col_Names[1:], index=vSectors)
+        )
 
-    ## Direct coefficients (closed model)
-    # Appending necessary things to indexes/columns
-    colClosed = np.append(vSectors, "Consumo das Famílias")
-    indexClosed = np.append(vSectors, "Remunerações")
+        # Taxes Multipliers
+        vNameSheets.append("Mult_Imp")
+        vDataSheets.append(
+            pd.DataFrame(mTaxesMultipliers[:, 1:], columns=mTaxesMultipliers_Col_Names[1:], index=vSectors)
+        )
 
-    # Creating dataframe
-    vNameSheets.append("Coef_Diretos_Fechado (mA)")
-    vDataSheets.append(pd.DataFrame(mA_closed, columns=colClosed, index=indexClosed))
+        # Variance Coefficients
+        vNameSheets.append("Coef_Var")
+        vDataSheets.append(pd.DataFrame(mVarCoef[:, 1:], columns=mVarCoef_Col_Names[1:], index=vSectors))
 
-    # Leontief (closed model)
-    vNameSheets.append("Leontief Fechado (mB)")
-    vDataSheets.append(pd.DataFrame(mB_closed, columns=colClosed, index=indexClosed))
+        # "Índices de Ligação" (HR Indices)
+        vNameSheets.append("Ind_Lig")
+        vDataSheets.append(pd.DataFrame(mIndLig[:, 1:], columns=mIndLig_Col_Names[1:], index=vSectors))
 
-    # Direct coefficients (supply-side model)
-    vNameSheets.append("Coef_Diretos_Oferta (mA)")
-    vDataSheets.append(pd.DataFrame(mF, columns=vSectors, index=vSectors))
+        # "Índices de Ligação Puros Normalizados" (GHS Indices)
+        vNameSheets.append("Ind_Lig_Puros")
+        vDataSheets.append(pd.DataFrame(mIndPureLigNorm[:, 1:], columns=mIndPureLig_Col_Names[1:], index=vSectors))
 
-    # Leontief (supply-side model)
-    vNameSheets.append("Matriz de Ghosh")
-    vDataSheets.append(pd.DataFrame(mGhosh, columns=vSectors, index=vSectors))
+        # Influence Areas
+        vNameSheets.append("Campo_Influencia")
+        vDataSheets.append(pd.DataFrame(mInfluence, columns=vSectors, index=vSectors))
 
-    ## Writing Excel File to 'Output' directory
-    Support.write_data_excel(sDirectory="./Output/Tabelas_Main/Análises/",
-                             sFileName=f"Resultados_{nYear}_{nSectors}{sAPF}{sClosedGuilhotoIndicator}.xlsx",
-                             vSheetName=vNameSheets, vDataSheet=vDataSheets)
+        # Hypothetical Extractions
+        vNameSheets.append("Extr_Hip")
+        vDataSheets.append(pd.DataFrame(mExtractions[:, 1:], columns=mExtractions_Col_Names[1:], index=vSectors))
+
+        # Structural Decomposition
+        if doStructure:
+            # Results
+            vNameSheets.append(f"Decomp_Estrutural_{nYear}_{nYear_Decomp}")
+            vDataSheets.append(
+                pd.DataFrame(mDecomposition[:, 1:], columns=mDecomposition_Col_Names[1:], index=mDecomposition_Index)
+            )
+            # Year 0 MIP
+            vNameSheets.append(f"MIP_{nYear_Decomp}")
+            vDataSheets.append(dfMIP0)
+
+        # Direct coefficients (open model)
+        vNameSheets.append("Coef_Diretos_Aberto (mA)")
+        vDataSheets.append(pd.DataFrame(mA, columns=vSectors, index=vSectors))
+
+        # Leontief (open model)
+        vNameSheets.append("Leontief Aberto (mB)")
+        vDataSheets.append(pd.DataFrame(mB, columns=vSectors, index=vSectors))
+
+        ## Direct coefficients (closed model)
+        # Appending necessary things to indexes/columns
+        colClosed = np.append(vSectors, "Consumo das Famílias")
+        indexClosed = np.append(vSectors, "Remunerações")
+
+        # Creating dataframe
+        vNameSheets.append("Coef_Diretos_Fechado (mA)")
+        vDataSheets.append(pd.DataFrame(mA_closed, columns=colClosed, index=indexClosed))
+
+        # Leontief (closed model)
+        vNameSheets.append("Leontief Fechado (mB)")
+        vDataSheets.append(pd.DataFrame(mB_closed, columns=colClosed, index=indexClosed))
+
+        # Direct coefficients (supply-side model)
+        vNameSheets.append("Coef_Diretos_Oferta (mA)")
+        vDataSheets.append(pd.DataFrame(mF, columns=vSectors, index=vSectors))
+
+        # Leontief (supply-side model)
+        vNameSheets.append("Matriz de Ghosh")
+        vDataSheets.append(pd.DataFrame(mGhosh, columns=vSectors, index=vSectors))
+
+        ## Writing Excel File to 'Output' directory
+        Support.write_data_excel(sDirectory="./Output/Tabelas_Main/Análises/",
+                                 sFileName=f"Resultados_{nYear}_{nSectors}{sAPF}{sClosedGuilhotoIndicator}.xlsx",
+                                 vSheetName=vNameSheets, vDataSheet=vDataSheets)
 
     ### ============================================================================================
     ### Creating Graphs (if requested)
     ### ============================================================================================
 
-    if saveFig:
+    if bSaveFig:
         ## Creating color list and highlighting desired sector (if necessary)
         lColours = ["#595959"] * nSectors
         lColours_Hypo = ["green"] * nSectors
@@ -735,7 +739,7 @@ if __name__ == '__main__':
         # Traditional (HR)
         Support.named_scatter_plot(
             x=mIndLig[:, 3], y=mIndLig[:, 1],
-            inf_lim=0.5, sup_lim=1.5 if nSectors <= 20 else 2, nTextLimit=0.25,
+            inf_lim=0.5, sup_lim=1.5 if nSectors <= 20 else 2, nTextLimit=0.195,
             sTitle=f"Índices de Ligação e Setores-Chave - {nYear}",
             sXTitle="Índice de Ligação para Frente  - Matriz de Ghosh", sYTitle="Índice de Ligação para Trás",
             vLabels=vSectors_Graph,  sFigName=f"Ind_Lig_{nYear}", PointColor=lColours, bPureLinkages=False
