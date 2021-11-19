@@ -307,11 +307,11 @@ def abbreviate_sectors_names(vSectors):
         elif name.startswith("Têxteis"):
             new_name = "Têxteis"
         elif name == "Fabricação de madeira, celulose e produtos de papel":
-            new_name = "Madeira\nPapel"
+            new_name = "Papel\nMadeira"
         elif name == "Refino de petróleo, coquerias e biocombustíveis":
             new_name = "Refino\nPetr."
         elif name.startswith("Químicos"):
-            new_name = "Químicos"
+            new_name = "Quím."
         elif name.startswith("Metalurgia"):
             new_name = "Meta-\nlurgia"
         elif name == "Equipamentos eletroeletrônicos e mecânicos":
@@ -350,7 +350,7 @@ def bar_plot(vData, vXLabels, sTitle, sXTitle, sFigName,
 
     ## Creating fig object
     # Determining size based on the number of sectors
-    tupleFigSize = (8, 4) if len(vXLabels) <= 20 else (12, 6)
+    tupleFigSize = (8, 4) if len(vXLabels) <= 20 else (10, 5)
 
     # Creating fig object
     fig, ax = plt.subplots(figsize=tupleFigSize)

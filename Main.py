@@ -33,7 +33,7 @@ if __name__ == '__main__':
     
     ## Use MIPs estimated under Guilhoto (2010) or Alves-Passoni, Freitas (APF) (2020)?
     # If decided to use APF's matrices, remember to specify nDimension = 0 and nSectorsFile = 67 on line 60
-    bGuilhoto = False  # True or False
+    bGuilhoto = True  # True or False
 
     ## Whether to create and save figures
     saveFig = True  # True or False
