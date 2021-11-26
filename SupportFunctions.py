@@ -624,6 +624,7 @@ def closed_model_guilhoto(mFinalDemand, mAddedValue, nSectors, nColISFLSFConsump
     mR_Guilhoto = np.sum(mAddedValue[[nRowRemunerations, nRowRM], :], axis=0, keepdims=True).T
     # Capital income
     mEOB = mAddedValue[nRowEOB, :].reshape((nSectors, 1))
+    mEOB_Guilhoto = mEOB.copy()
     nTotalEOB = np.sum(mEOB)
 
     ## Checking difference between income and consumption
@@ -632,9 +633,9 @@ def closed_model_guilhoto(mFinalDemand, mAddedValue, nSectors, nColISFLSFConsump
     # If income < consumption, part of EOB has to be used as family income
     if nTotalDifference > 0:
         mR_Guilhoto += mEOB / nTotalEOB * nTotalDifference
-        mEOB += -mEOB / nTotalEOB * nTotalDifference
+        mEOB_Guilhoto += -mEOB / nTotalEOB * nTotalDifference
 
-    return mC_Guilhoto[:nSectors, :], mR_Guilhoto, mEOB, nTotalConsumption
+    return mC_Guilhoto[:nSectors, :], mR_Guilhoto, mEOB_Guilhoto, nTotalConsumption
 
 def leontief_closed(mTechnical, cConsumption, cRem, nSectors):
     """

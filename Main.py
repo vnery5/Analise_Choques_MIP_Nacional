@@ -26,7 +26,7 @@ if __name__ == '__main__':
     # 4: 68 sectors
     # 9: more than 68 sectors ("68+") - Currently, programmed to read 72 sectors (disaggregation of education)
     # 0: other (specify number of sectors below)
-    nDimension = 4
+    nDimension = 0
 
     ## Year to be analyzed
     nYear = 2019
@@ -41,7 +41,7 @@ if __name__ == '__main__':
 
     ## Highlight one sectors? If so, which index and color?
     bHighlightSectorFigs = True  # True or False
-    nIndexHighlightSectorsFigs = 37  # 3 or 37: Electricity & Gas (base 0 index)
+    nIndexHighlightSectorsFigs = 11  # 3, 11 or 37: Electricity & Gas (base 0 index)
     sHighlightColor = "red"
 
     ## Do a structural decomposition?
@@ -53,6 +53,15 @@ if __name__ == '__main__':
     bClosedGuilhoto = True  # True or False
     # If bClosedGuilhoto, update added values components in output MIP?
     bUpdateMIPClosedGuilhoto = True
+
+    ## Column and row numbers (base 0) (we don't need to worry about n = 51 because Guilhoto isn't possible)
+    # Final Demand
+    nColISFLSFConsumption = 2
+    nColFamilyConsumption = 3
+    # Added Value
+    nRowRemunerations = 1
+    nRowRM = 8
+    nRowEOB = 9
 
     ### ============================================================================================
 
@@ -150,15 +159,6 @@ if __name__ == '__main__':
         sClosedGuilhotoIndicator = "_Closed_Guilhoto"
         print("Closed model: Guilhoto")
 
-        ## Column and row numbers (base 0) (we don't need to worry about n = 51 because Guilhoto isn't possible)
-        # Final Demand
-        nColISFLSFConsumption = 2
-        nColFamilyConsumption = 3
-        # Added Value
-        nRowRemunerations = 1
-        nRowRM = 8
-        nRowEOB = 9
-
         ## Concatenating (vertically) final demand productive sectors and imports/taxes (without total lines)
         mFinalDemand_Import_Taxes = np.vstack((mFinalDemand, mSP_FD))
 
@@ -174,14 +174,15 @@ if __name__ == '__main__':
         ## Replacing values in MIP (if requested)
         if bUpdateMIPClosedGuilhoto:
             # Replacing values in added value matrix
-            mAddedValue[nRowRemunerations, :] = mR_Guilhoto.reshape(-1)
-            mAddedValue[nRowRM, :] = 0
-            mAddedValue[nRowEOB, :] = mEOB_Guilhoto.reshape(-1)
+            mAddedValue_Guilhoto = mAddedValue.copy()
+            mAddedValue_Guilhoto[nRowRemunerations, :] = mR_Guilhoto.reshape(-1)
+            mAddedValue_Guilhoto[nRowRM, :] = 0
+            mAddedValue_Guilhoto[nRowEOB, :] = mEOB_Guilhoto.reshape(-1)
 
             ## Creating new MIP DataFrame
             dfMIP_ClosedGuilhoto = dfMIP.copy()
             # Updating added value components
-            dfMIP_ClosedGuilhoto.iloc[-15:-1, :nSectors] = mAddedValue
+            dfMIP_ClosedGuilhoto.iloc[-15:-1, :nSectors] = mAddedValue_Guilhoto
             # Dropping EOB + RM and RM
             dfMIP_ClosedGuilhoto.drop(index=dfMIP.iloc[-8:-6, :].index.tolist(), inplace=True)
 
@@ -276,12 +277,28 @@ if __name__ == '__main__':
 
     ## Creating array with all multiplier names
     mIncomeMultipliers_Col_Names = [
-        "Setor", "Coeficiente", "Multiplicador Simples de Renda", "Multiplicador de Renda Tipo I",
-        "Multiplicador Total de Renda (truncado)", "Multiplicador de Renda Tipo II",
-        "Efeito Direto", "Efeito Indireto", "Efeito Induzido"
+        "Setor", "Coeficiente", "Multiplicador Simples de Renda do Trabalho",
+        "Multiplicador de Renda do Trabalho Tipo I", "Multiplicador Total de Renda do Trabalho (truncado)",
+        "Multiplicador de Renda do Trabalho Tipo II", "Efeito Direto", "Efeito Indireto", "Efeito Induzido"
     ]
     ## Creating table with all multipliers
     mIncomeMultipliers = Support.calc_multipliers(mR, mX, mA, mB, mB_closed, vSectors, nSectors)
+
+    ### ============================================================================================
+    ### Capital (EOB) Multipliers: Same interpretation as that of labor multipliers
+    ### ============================================================================================
+
+    ## Defining mEOB vector (nSectors x 1 matrix)
+    mEOB = mAddedValue[nRowEOB, :].reshape((nSectors, 1))
+
+    ## Creating array with all multiplier names
+    mEOBMultipliers_Col_Names = [
+        "Setor", "Coeficiente", "Multiplicador Simples de Renda do Capital",
+        "Multiplicador de Renda do Capital Tipo I", "Multiplicador Total de Renda do Capital (truncado)",
+        "Multiplicador de Renda do Capital Tipo II", "Efeito Direto", "Efeito Indireto", "Efeito Induzido"
+    ]
+    ## Creating table with all multipliers
+    mEOBMultipliers = Support.calc_multipliers(mEOB, mX, mA, mB, mB_closed, vSectors, nSectors)
 
     ### ============================================================================================
     ### Taxes Multipliers: Same interpretation as above and considering only sectorial taxes
@@ -539,10 +556,16 @@ if __name__ == '__main__':
         vNameSheets.append("Mult_Trab")
         vDataSheets.append(pd.DataFrame(mEmpMultipliers[:, 1:], columns=mEmpMultipliers_Col_Names[1:], index=vSectors))
 
-        # Income Multipliers
-        vNameSheets.append("Mult_Renda")
+        # Work Income Multipliers
+        vNameSheets.append("Mult_Remuneracoes")
         vDataSheets.append(
             pd.DataFrame(mIncomeMultipliers[:, 1:], columns=mIncomeMultipliers_Col_Names[1:], index=vSectors)
+        )
+
+        # Capital Income Multipliers
+        vNameSheets.append("Mult_Capital")
+        vDataSheets.append(
+            pd.DataFrame(mEOBMultipliers[:, 1:], columns=mEOBMultipliers_Col_Names[1:], index=vSectors)
         )
 
         # Taxes Multipliers
@@ -691,26 +714,48 @@ if __name__ == '__main__':
             sFigName=f"Mult_Emp_Tipo2_{nYear}", nY_Adjust=0.08, BarColor=lColours
         )
 
-        ## Income Multipliers
+        ## Work Income Multipliers
         Support.bar_plot(
             vData=mIncomeMultipliers[:, 2], vXLabels=vSectors_Graph,
-            sTitle=f"Multiplicadores Simples de Renda - {nYear}", sXTitle="Setores",
-            sFigName=f"Mult_Renda_Simples_{nYear}", nY_Adjust=0.0005, BarColor=lColours
+            sTitle=f"Multiplicadores Simples de Renda do Trabalho - {nYear}", sXTitle="Setores",
+            sFigName=f"Mult_RendaTrab_Simples_{nYear}", nY_Adjust=0.0005, BarColor=lColours
         )
         Support.bar_plot(
             vData=mIncomeMultipliers[:, 3], vXLabels=vSectors_Graph,
-            sTitle=f"Multiplicadores de Renda (Tipo I) - {nYear}", sXTitle="Setores",
-            sFigName=f"Mult_Renda_Tipo1_{nYear}", BarColor=lColours
+            sTitle=f"Multiplicadores de Renda do Trabalho (Tipo I) - {nYear}", sXTitle="Setores",
+            sFigName=f"Mult_RendaTrab_Tipo1_{nYear}", BarColor=lColours
         )
         Support.bar_plot(
             vData=mIncomeMultipliers[:, 4], vXLabels=vSectors_Graph,
-            sTitle=f"Multiplicadores Totais de Renda (Truncados) - {nYear}", sXTitle="Setores",
-            sFigName=f"Mult_Renda_Tot_{nYear}", nY_Adjust=0.0005, BarColor=lColours
+            sTitle=f"Multiplicadores Totais de Renda do Trabalho (Truncados) - {nYear}", sXTitle="Setores",
+            sFigName=f"Mult_RendaTrab_Tot_{nYear}", nY_Adjust=0.0005, BarColor=lColours
         )
         Support.bar_plot(
             vData=mIncomeMultipliers[:, 5], vXLabels=vSectors_Graph,
-            sTitle=f"Multiplicadores de Renda (Tipo II) - {nYear}", sXTitle="Setores",
-            sFigName=f"Mult_Renda_Tipo2_{nYear}", nY_Adjust=0.002, BarColor=lColours
+            sTitle=f"Multiplicadores de Renda do Trabalho (Tipo II) - {nYear}", sXTitle="Setores",
+            sFigName=f"Mult_RendaTrab_Tipo2_{nYear}", nY_Adjust=0.002, BarColor=lColours
+        )
+
+        ## Capital Income Multipliers
+        Support.bar_plot(
+            vData=mEOBMultipliers[:, 2], vXLabels=vSectors_Graph,
+            sTitle=f"Multiplicadores Simples de Renda do Capital - {nYear}", sXTitle="Setores",
+            sFigName=f"Mult_RendaCapital_Simples_{nYear}", nY_Adjust=0.0005, BarColor=lColours
+        )
+        Support.bar_plot(
+            vData=mEOBMultipliers[:, 3], vXLabels=vSectors_Graph,
+            sTitle=f"Multiplicadores de Renda do Capital (Tipo I) - {nYear}", sXTitle="Setores",
+            sFigName=f"Mult_RendaCapital_Tipo1_{nYear}", BarColor=lColours
+        )
+        Support.bar_plot(
+            vData=mEOBMultipliers[:, 4], vXLabels=vSectors_Graph,
+            sTitle=f"Multiplicadores Totais de Renda do Capital (Truncados) - {nYear}", sXTitle="Setores",
+            sFigName=f"Mult_RendaCapital_Tot_{nYear}", nY_Adjust=0.0005, BarColor=lColours
+        )
+        Support.bar_plot(
+            vData=mEOBMultipliers[:, 5], vXLabels=vSectors_Graph,
+            sTitle=f"Multiplicadores de Renda do Capital (Tipo II) - {nYear}", sXTitle="Setores",
+            sFigName=f"Mult_RendaCapital_Tipo2_{nYear}", nY_Adjust=0.002, BarColor=lColours
         )
 
         ## Taxes Multipliers
