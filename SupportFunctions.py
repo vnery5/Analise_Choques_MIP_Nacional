@@ -14,7 +14,7 @@ import seaborn as sns
 
 def read_ibge(sFileMIP, sFileTRU):
     """
-    Reads IBGE's Input Output File and the Added Value sheet from TRU's and returns the necessary matrixes.
+    Reads IBGE's Input Output File and the Added Value sheet from TRU's and returns the necessary matrices.
     :param sFileMIP: Excel file with IBGE's input-output tables
     :param sFileTRU: Excel file with IBGE's Added Value table
     :return:
@@ -193,7 +193,7 @@ def read_deflator(nYear, nSectors, EstimaMIP=True):
     2010 = 100
     :param nYear: Desired year to get the price index
     :param nSectors: Number of sectors
-    :param EstimaMIP: boolean; whether to get indexes calculated using "EstimaMIP" matrixes
+    :param EstimaMIP: boolean; whether to get indexes calculated using "EstimaMIP" matrices
         EstimaMIP=True is the only option when working with more than 20 sectors
     :return:
         mZ_index: price indexes for intermediate consumption (nSectors x nSectors matrix)
