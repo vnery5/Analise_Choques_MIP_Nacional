@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import datetime
 import seaborn as sns
 
+
 ### ============================================================================================
 
 def read_ibge(sFileMIP, sFileTRU):
@@ -75,6 +76,7 @@ def read_ibge(sFileMIP, sFileTRU):
     mSP = np.reshape(mSP, (nSectors, 1)).astype(float)
 
     return nSectors, vSectors, mZ, mY, mX, mC, mV, mR, mE, mSP
+
 
 def read_estimated_mip(sFileMIP, sSheetName="MIP"):
     """
@@ -165,6 +167,7 @@ def read_estimated_mip(sFileMIP, sSheetName="MIP"):
 
     return dfMIP, nSectors, vSectors, mZ, mY, mX, mC, mV, mR, mE, mSP, vAVNames, mAddedValue, vFDNames, mFinalDemand
 
+
 def correct_order(df):
     """
     For base 12 sector aggregation, fixes the output order
@@ -182,6 +185,7 @@ def correct_order(df):
     dfOrdered = df.append(dfHousingFood)
 
     return dfOrdered
+
 
 def read_deflator(nYear, nSectors, EstimaMIP=True):
     """
@@ -213,7 +217,7 @@ def read_deflator(nYear, nSectors, EstimaMIP=True):
 
     ## Getting relevant year's data
     # Intermediate Consumption
-    mZ_index = mZ_index[(nYear - 2010)*nSectors:(nYear + 1 - 2010)*nSectors, 2:]
+    mZ_index = mZ_index[(nYear - 2010) * nSectors:(nYear + 1 - 2010) * nSectors, 2:]
     mZ_index = mZ_index.astype(float)
     # Final Demand
     mY_index = mY_index[nYear - 2010, 1:].astype(float)
@@ -221,6 +225,7 @@ def read_deflator(nYear, nSectors, EstimaMIP=True):
     mX_index = mX_index[nYear - 2010, 1:].astype(float)
 
     return mZ_index, mY_index, mX_index
+
 
 ### ============================================================================================
 
@@ -328,6 +333,7 @@ def abbreviate_sectors_names(vSectors):
 
     return np.array(vSectors_Graph)
 
+
 def bar_plot(vData, vXLabels, sTitle, sXTitle, sFigName,
              nY_Adjust=0.001, BarColor="#595959", bMean=False, bAnnotate=True, nDirectory=None):
     """
@@ -397,6 +403,7 @@ def bar_plot(vData, vXLabels, sTitle, sXTitle, sFigName,
     fig.savefig(sFileName, dpi=600, bbox_inches="tight")
     plt.close(fig)
 
+
 def named_scatter_plot(x, y, inf_lim, sup_lim, sTitle, vLabels, sXTitle, sYTitle, sFigName,
                        bPureLinkages, nTextLimit=0.045, PointColor="black"):
     """
@@ -439,7 +446,7 @@ def named_scatter_plot(x, y, inf_lim, sup_lim, sTitle, vLabels, sXTitle, sYTitle
     # Point Labels
     for i, txt in enumerate(vLabels):
         # if the point is too close to the origin, don't annotate
-        if (abs(1 - x[i])**2 + abs(1 - y[i])**2)**0.5 > 1.41*nTextLimit:
+        if (abs(1 - x[i]) ** 2 + abs(1 - y[i]) ** 2) ** 0.5 > 1.41 * nTextLimit:
             if "\n" in txt:  # replace new lines with spaces
                 txt = txt.replace("\n", " ")
             ax.annotate(txt, (x[i] + 0.02, y[i] - 0.012))
@@ -472,6 +479,7 @@ def named_scatter_plot(x, y, inf_lim, sup_lim, sTitle, vLabels, sXTitle, sYTitle
     sFileName = f"Output/Figuras_{len(vLabels)}/{sFigName}.pdf"
     fig.savefig(sFileName, dpi=600, bbox_inches="tight")
 
+
 def influence_matrix_graph(mInfluence, vSectors, nSectors, sTitle, sFigName):
     """
     Graphs the influence matrix: the darker the color, the larger the importance of the link
@@ -498,7 +506,7 @@ def influence_matrix_graph(mInfluence, vSectors, nSectors, sTitle, sFigName):
     ## Creating categorized matrix
     mCategoriesInfluence = np.where(mInfluence < nMeanInfluence, 1,
                                     np.where(mInfluence < nMeanInfluence + nSTDInfluence, 2,
-                                             np.where(mInfluence < nMeanInfluence + 2*nSTDInfluence, 3, 4)))
+                                             np.where(mInfluence < nMeanInfluence + 2 * nSTDInfluence, 3, 4)))
 
     labels = ["Menor que a Média", "Entre a Média\ne a Média + DP",
               "Entre a Média + DP\ne a Média + 2DP", "Maior que a\nMédia + 2DP"]
@@ -569,6 +577,7 @@ def influence_matrix_graph(mInfluence, vSectors, nSectors, sTitle, sFigName):
     sFileName = f"Output/Figuras_{nSectors}/" + sFigName + "_Discreto.pdf"
     fig_disc.savefig(sFileName, dpi=600, bbox_inches="tight")
 
+
 ### ============================================================================================
 
 def leontief_open(mIC, vProduction, nSectors):
@@ -595,6 +604,7 @@ def leontief_open(mIC, vProduction, nSectors):
     mLeontief = np.linalg.inv(mI - mA)
 
     return mA, mLeontief
+
 
 def closed_model_guilhoto(mFinalDemand, mAddedValue, nSectors, nColISFLSFConsumption, nColFamilyConsumption,
                           nRowRemunerations, nRowRM, nRowEOB):
@@ -637,6 +647,7 @@ def closed_model_guilhoto(mFinalDemand, mAddedValue, nSectors, nColISFLSFConsump
 
     return mC_Guilhoto[:nSectors, :], mR_Guilhoto, mEOB_Guilhoto, nTotalConsumption
 
+
 def leontief_closed(mTechnical, cConsumption, cRem, nSectors):
     """
     Calculates Leontief and the Direct Technical Coefficients matrices in the CLOSED model.
@@ -664,6 +675,7 @@ def leontief_closed(mTechnical, cConsumption, cRem, nSectors):
 
     return mA_closed, mLeontief_closed
 
+
 def ghosh_supply(mIC, vProduction, nSectors):
     """
     Calculates Ghosh's and the Direct Technical Coefficients Matrices (supply-side model)
@@ -690,6 +702,7 @@ def ghosh_supply(mIC, vProduction, nSectors):
     mGhosh = np.linalg.inv(mI - mF)
 
     return mF, mGhosh
+
 
 def calc_multipliers(vInput, vProduction, mDirectCoef, mLeontief_open, mLeontief_closed, vSectors, nSectors):
     """
@@ -746,6 +759,7 @@ def calc_multipliers(vInput, vProduction, mDirectCoef, mLeontief_open, mLeontief
 
     return mMultipliers
 
+
 def linkages(mLeontief, mGhosh, vColNames, nSectors, vSectors):
     """
     Calculates linkage indicators (backwards and forwards in Ghosh's and Leontief's models).
@@ -791,6 +805,7 @@ def linkages(mLeontief, mGhosh, vColNames, nSectors, vSectors):
     )
 
     return dfIndLig.to_numpy()
+
 
 def calc_ipl(vDemand, mA, vSectors, nSectors):
     """
@@ -863,6 +878,7 @@ def calc_ipl(vDemand, mA, vSectors, nSectors):
 
     return mIPL, IPLNorm
 
+
 def influence_matrix(mA, nIncrement, nSectors):
     """
     Calculates the influence matrix, detailed by sector (see Vale, Perobelli, p. 98-103)
@@ -900,6 +916,7 @@ def influence_matrix(mA, nIncrement, nSectors):
             mIncrement[r, c] = 0
 
     return mInfluence
+
 
 def extraction(mA, mA_supply, vProduction, vFinalDemand, mSP, vSectors, nSectors):
     """
@@ -960,6 +977,7 @@ def extraction(mA, mA_supply, vProduction, vFinalDemand, mSP, vSectors, nSectors
 
     return mExtractions
 
+
 ### ============================================================================================
 
 def format_shock_sheet(vNew, vOld, vDelta, vPercentage, vSectors, vColNames):
@@ -1000,6 +1018,7 @@ def format_shock_sheet(vNew, vOld, vDelta, vPercentage, vSectors, vColNames):
 
     return dfSheet
 
+
 def calculate_total_impact(vNew, vOld, vDelta):
     """
     For each matrix/vector, calculate the total impact for the whole economy
@@ -1016,6 +1035,7 @@ def calculate_total_impact(vNew, vOld, vDelta):
     vTotal[3] = vTotal[2] / vTotal[1]
 
     return vTotal
+
 
 def aggregate_shocks(dfData, nSectorsAggreg, sAggregFile, sAggregSheet, Aggreg, Add_Sectors,
                      lAdd_Sectors, lDisaggreg_Sectors, lAdd_Names, vSectors):
@@ -1095,6 +1115,7 @@ def aggregate_shocks(dfData, nSectorsAggreg, sAggregFile, sAggregSheet, Aggreg, 
     dfData["Impacto Relativo (%)"] = [f"{i.replace('.', ',')}" for i in dfData["Impacto Relativo (%)"]]
 
     return dfData
+
 
 ### ============================================================================================
 def write_data_excel(sDirectory, sFileName, vSheetName, vDataSheet):
