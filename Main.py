@@ -29,7 +29,7 @@ if __name__ == '__main__':
     nDimension = 0
 
     ## Year to be analyzed
-    nYear = 2019
+    nYear = 2018
     
     ## Use MIPs estimated under Guilhoto (2010) or Alves-Passoni, Freitas (APF) (2020)?
     # If decided to use APF's matrices, remember to specify nDimension = 0 and nSectorsFile = 67 on line 60
@@ -39,8 +39,8 @@ if __name__ == '__main__':
     bSaveFig = True  # True or False
     bWriteExcel = True  # True or False
 
-    ## Highlight one sectors? If so, which index and color?
-    bHighlightSectorFigs = True  # True or False
+    ## Highlight one sector? If so, which index and color?
+    bHighlightSectorFigs = False  # True or False
     nIndexHighlightSectorsFigs = 11  # 3, 11 or 37: Electricity & Gas (base 0 index)
     sHighlightColor = "red"
 
@@ -50,7 +50,7 @@ if __name__ == '__main__':
     nYear_Decomp = 2015
 
     ## Closed model methodology: use Guilhoto's (True) or Vale, Perobelli's (False)?
-    bClosedGuilhoto = True  # True or False
+    bClosedGuilhoto = False  # True or False
     # If bClosedGuilhoto, update added values components in output MIP?
     bUpdateMIPClosedGuilhoto = True
 
