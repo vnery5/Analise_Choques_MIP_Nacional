@@ -132,7 +132,7 @@ if __name__ == '__main__':
         turning household consumption into an endogenous variable alongside labor remunerations
         """
         ## Calculating Coefficients
-        ## Methodology proposed by Vale, Perobelli, 2021
+        ## Methodology in by Vale, Perobelli (2021)
         ## n = 51 sectors doesn't have the differentiation between EOB and RM (required for Guilhoto's methodology)
         if not bClosedGuilhoto or nDimension == 3:
             ## Indicator for differentiation when saving spreadsheet
@@ -623,6 +623,11 @@ if __name__ == '__main__':
             mPFL = pd.DataFrame(np.zeros([nSectors, 10]), index=vSectors, columns=[f"{i}" for i in range(nYear0, nYear1)])
             mPTL = pd.DataFrame(np.zeros([nSectors, 10]), index=vSectors, columns=[f"{i}" for i in range(nYear0, nYear1)])
 
+            mDispersaoFrenteVendas = pd.DataFrame(np.zeros([nSectors, 10]), index=vSectors,
+                                                  columns=[f"{i}" for i in range(nYear0, nYear1)])
+            mDispersaoTrasCompras = pd.DataFrame(np.zeros([nSectors, 10]), index=vSectors,
+                                                 columns=[f"{i}" for i in range(nYear0, nYear1)])
+
         mMultProdSimples.values[:, nYear - nYear0] = mProdMultipliers[:, 1]
         mMultProdTot.values[:, nYear - nYear0] = mProdMultipliers[:, 2]
         mMultProdTotTrunc.values[:, nYear - nYear0] = mProdMultipliers[:, 3]
@@ -676,6 +681,9 @@ if __name__ == '__main__':
         mPFL.values[:, nYear - nYear0] = mIndPureLigNorm[:, 2]
         mPTL.values[:, nYear - nYear0] = mIndPureLigNorm[:, 3]
 
+        mDispersaoFrenteVendas.values[:, nYear - nYear0] = mVarCoef[:, 1]
+        mDispersaoTrasCompras.values[:, nYear - nYear0] = mVarCoef[:, 2]
+
     vNomes = ["Mult Produção Simples", "Mult Produção Total", "Mult Produção Total Truncado",
               "Mult Emprego Simples", "Mult Emprego Total",
               "Mult Remunerações Simples", "Mult Remunerações Total",
@@ -690,7 +698,8 @@ if __name__ == '__main__':
               "Direto Remunerações", "Indireto Remunerações", "Induzido Remunerações",
               "Direto EOB", "Indireto EOB", "Induzido EOB",
               "Direto Impostos", "Indireto Impostos", "Induzido Impostos",
-              "Direto Energia", "Indireto Energia", "Induzido Energia"]
+              "Direto Energia", "Indireto Energia", "Induzido Energia",
+              "Dispersão Trás Compras", "Dispersão Frente Vendas"]
 
     vDados = [mMultProdSimples, mMultProdTot, mMultProdTotTrunc, mMultEmpregoSimples, mMultEmpregoTot,
               mMultRemunSimples, mMultRemunTot, mMultCapitalSimples, mMultCapitalTot,
@@ -700,7 +709,7 @@ if __name__ == '__main__':
               mMultCapitalT1, mMultCapitalT2, mMultImpostosT1, mMultImpostosT2,
               mEmpDir, mEmpIndir, mEmpInduz, mRemunDir, mRemunIndir, mRemunInduz,
               mCapitalDir, mCapitalIndir, mCapitalInduz, mImpostosDir, mImpostosIndir, mImpostosInduz,
-              mEnergiaDir, mEnergiaIndir, mEnergiaInduz]
+              mEnergiaDir, mEnergiaIndir, mEnergiaInduz, mDispersaoTrasCompras, mDispersaoFrenteVendas]
 
     Support.write_data_excel(sDirectory="./Output/Tabelas_Main/",
                              sFileName=f"Compilados_{nSectors}_{nYear0}_{nYear1 - 1}{sClosedGuilhotoIndicator}.xlsx",
