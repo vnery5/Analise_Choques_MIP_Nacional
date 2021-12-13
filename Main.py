@@ -26,17 +26,17 @@ if __name__ == '__main__':
     # 4: 68 sectors
     # 9: more than 68 sectors ("68+") - Currently, programmed to read 72 sectors (disaggregation of education)
     # 0: other (specify number of sectors below)
-    nDimension = 0
+    nDimension = 4
 
     ## Year to be analyzed
-    nYear = 2018
+    nYear = 2019
     
     ## Use MIPs estimated under Guilhoto (2010) or Alves-Passoni, Freitas (APF) (2020)?
     # If decided to use APF's matrices, remember to specify nDimension = 0 and nSectorsFile = 67 on line 60
     bGuilhoto = True  # True or False
 
     ## Whether to create and save figures and write spreadsheet
-    bSaveFig = True  # True or False
+    bSaveFig = False  # True or False
     bWriteExcel = True  # True or False
 
     ## Highlight one sector? If so, which index and color?
@@ -62,6 +62,8 @@ if __name__ == '__main__':
     nRowRemunerations = 1
     nRowRM = 8
     nRowEOB = 9
+    # Energy
+    nRowEnergy = 37 if nDimension == 4 else 11  # Electricity & Gas (base 0 index)
 
     ### ============================================================================================
 
@@ -104,7 +106,7 @@ if __name__ == '__main__':
 
     ### Print start
     sTimeBegin = datetime.datetime.now()
-    print("======================= INPUT OUTPUT INDICATORS - VERSION 2 =======================")
+    print("======================= INPUT OUTPUT INDICATORS - VERSION 3 =======================")
     print(f"Starting for year = {nYear} and dimension = {nDimension}{bSaveFigIndicator} ({sTimeBegin})")
     print(invalidSectorNumber)
 
@@ -148,7 +150,7 @@ if __name__ == '__main__':
         # (only including remunerations or, in other words, excluding EOB and RM)
         hC = mC / np.sum(mR)
 
-        # Remunerations (transposed): percentage of each sector's production that becomes income
+        # Remunerations (transposed): percentage of each sector's production that becomes work income
         hR = mR / mX
         hR = hR.T
 
@@ -272,7 +274,7 @@ if __name__ == '__main__':
     mEmpMultipliers = Support.calc_multipliers(mE, mX, mA, mB, mB_closed, vSectors, nSectors)
 
     ### ============================================================================================
-    ### Income Multipliers: Same interpretation as that of labor multipliers
+    ### Income Multipliers: Same interpretation as that of labor multipliers, but without the 1 million unit denominator
     ### ============================================================================================
 
     ## Creating array with all multiplier names
@@ -285,7 +287,7 @@ if __name__ == '__main__':
     mIncomeMultipliers = Support.calc_multipliers(mR, mX, mA, mB, mB_closed, vSectors, nSectors)
 
     ### ============================================================================================
-    ### Capital (EOB) Multipliers: Same interpretation as that of labor multipliers
+    ### Capital (EOB) Multipliers: Same interpretation as that of income multipliers
     ### ============================================================================================
 
     ## Defining mEOB vector (nSectors x 1 matrix)
@@ -317,6 +319,21 @@ if __name__ == '__main__':
 
     ## Creating table with all multipliers
     mTaxesMultipliers = Support.calc_multipliers(mTaxes, mX, mA, mB, mB_closed, vSectors, nSectors)
+
+    ### ============================================================================================
+    ### Energy Requirements
+    ### ============================================================================================
+
+    ## Defining energy vector (nSectors x 1 matrix)
+    mEnergy = mZ[nRowEnergy, :].reshape((nSectors, 1))
+
+    ## Creating array with all multiplier names
+    mEnergyMultipliers_Col_Names = [
+        "Setor", "Coeficiente", "Requerimentos Simples de Energia", "Requerimentos de Energia Tipo I",
+        "Requerimentos Totais de Energia", "Requerimentos de Energia Tipo II", "Requerimentos Diretos", "Requerimentos Indiretos", "Requerimentos Induzidos"
+    ]
+    ## Creating table with all multipliers
+    mEnergyMultipliers = Support.calc_multipliers(mEnergy, mX, mA, mB, mB_closed, vSectors, nSectors)
 
     ### ============================================================================================
     ### Linkages (Hirschman-Rasmussen - HR) and Variance Coefficients
@@ -410,6 +427,7 @@ if __name__ == '__main__':
 
     ### ============================================================================================
     ### Structural Decomposition - Open Model (p. 112)
+    ### TO DO: fix deflation issues
     """
     ≈ Similar method to the oaxaca counterfactual decomposition
     The method allows the decomposition of the input-output relationship between two points in time
@@ -572,6 +590,12 @@ if __name__ == '__main__':
         vNameSheets.append("Mult_Imp")
         vDataSheets.append(
             pd.DataFrame(mTaxesMultipliers[:, 1:], columns=mTaxesMultipliers_Col_Names[1:], index=vSectors)
+        )
+
+        # Energy requirements
+        vNameSheets.append("Req_Energia")
+        vDataSheets.append(
+            pd.DataFrame(mEnergyMultipliers[:, 1:], columns=mEnergyMultipliers_Col_Names[1:], index=vSectors)
         )
 
         # Variance Coefficients
