@@ -139,7 +139,7 @@ if __name__ == '__main__':
     turning household consumption into an endogenous variable alongside labor remunerations
     """
     ## Calculating Coefficients
-    ## Methodology proposed by Vale, Perobelli, 2021
+    ## Methodology in by Vale, Perobelli (2021)
     ## n = 51 sectors doesn't have the differentiation between EOB and RM (required for Guilhoto's methodology)
     if not bClosedGuilhoto or nDimension == 3:
         ## Indicator for differentiation when saving spreadsheet
@@ -330,7 +330,8 @@ if __name__ == '__main__':
     ## Creating array with all multiplier names
     mEnergyMultipliers_Col_Names = [
         "Setor", "Coeficiente", "Requerimentos Simples de Energia", "Requerimentos de Energia Tipo I",
-        "Requerimentos Totais de Energia", "Requerimentos de Energia Tipo II", "Requerimentos Diretos", "Requerimentos Indiretos", "Requerimentos Induzidos"
+        "Requerimentos Totais de Energia", "Requerimentos de Energia Tipo II",
+        "Requerimentos Diretos", "Requerimentos Indiretos", "Requerimentos Induzidos"
     ]
     ## Creating table with all multipliers
     mEnergyMultipliers = Support.calc_multipliers(mEnergy, mX, mA, mB, mB_closed, vSectors, nSectors)
@@ -427,7 +428,6 @@ if __name__ == '__main__':
 
     ### ============================================================================================
     ### Structural Decomposition - Open Model (p. 112)
-    ### TO DO: fix deflation issues
     """
     ≈ Similar method to the oaxaca counterfactual decomposition
     The method allows the decomposition of the input-output relationship between two points in time

@@ -54,7 +54,7 @@ def read_ibge(sFileMIP, sFileTRU):
     mC = m[:, -5]
     mC = np.reshape(mC, (nSectors, 1)).astype(float)
 
-    ## Reading added value sheet in the TRU's excel file
+    ## Reading added value sheet in the TRU's Excel file
     tru = pd.read_excel(sFileTRU, sheet_name="VA")
     # Dropping "empty cells"
     tru = tru.dropna()
@@ -189,7 +189,7 @@ def correct_order(df):
 
 def read_deflator(nYear, nSectors, EstimaMIP=True):
     """
-    Reads the excel file containing price indexes by sector for intermediate consumption, final demand and production
+    Reads the Excel file containing price indexes by sector for intermediate consumption, final demand and production
     2010 = 100
     :param nYear: Desired year to get the price index
     :param nSectors: Number of sectors
@@ -339,9 +339,9 @@ def bar_plot(vData, vXLabels, sTitle, sXTitle, sFigName,
     """
     Creates a styled bar plot containing the data
     :param vData: vector (1D array) containing the data to be plotted
-    :param vXLabels: vector containing the x axis labels
+    :param vXLabels: vector containing the x-axis labels
     :param sTitle: string containing the title
-    :param sXTitle: string containing the title for the x axis
+    :param sXTitle: string containing the title for the x-axis
     :param nY_Adjust: float that adjusts the height of the annotations. Defaults to 0.001.
     :param sFigName: desired file name of the saved figure (without the extension).
         The figures are saved in the "Figuras" subdirectory.
@@ -361,7 +361,7 @@ def bar_plot(vData, vXLabels, sTitle, sXTitle, sFigName,
     # Creating fig object
     fig, ax = plt.subplots(figsize=tupleFigSize)
 
-    ## Creating bars with the the respective colours
+    ## Creating bars with the respective colours
     # If a list is supplied, check if it has the same length as number of sectors
     if (isinstance(BarColor, list) and len(vXLabels) == len(BarColor)) or (isinstance(BarColor, str)):
         plt.bar(x=vXLabels, height=vData, color=BarColor, zorder=4)
@@ -408,14 +408,14 @@ def named_scatter_plot(x, y, inf_lim, sup_lim, sTitle, vLabels, sXTitle, sYTitle
                        bPureLinkages, nTextLimit=0.045, PointColor="black"):
     """
     Creates a styled scatter plot containing the data and labels
-    :param x: data for the x axis
-    :param y: data for the y axis
+    :param x: data for the x-axis
+    :param y: data for the y-axis
     :param inf_lim: inferior limit for both axis
     :param sup_lim: superior limit for both axis
     :param sTitle: string containing the title
     :param vLabels: vector containing the point labels
-    :param sXTitle: string containing the title for the x axis
-    :param sYTitle: string containing the title for the y axis
+    :param sXTitle: string containing the title for the x-axis
+    :param sYTitle: string containing the title for the y -xis
     :param sFigName: desired file name of the saved figure. The figures are saved in the "Figuras" subdirectory.
     :param bPureLinkages: boolean; pure linkages? Required because the classification of key sectors is different.
     :param nTextLimit: minimal distance to (1, 1) that a point has to have in order for the sector's name to be plotted
@@ -484,7 +484,7 @@ def influence_matrix_graph(mInfluence, vSectors, nSectors, sTitle, sFigName):
     """
     Graphs the influence matrix: the darker the color, the larger the importance of the link
     between sectors i (selling) and j (buying input for production)
-    Therefore, it the sector's row is darker, the larger impact it has selling goods
+    Therefore, if the sector's row is darker, the larger impact it has selling goods
     if the sector's column is darker, the larger impact it has buying goods
     :param mInfluence: Influence Matrix calculated using the influence_matrix function
     :param vSectors: vector containing sector's names (preferably abbreviated)
@@ -815,8 +815,8 @@ def calc_ipl(vDemand, mA, vSectors, nSectors):
     :param nSectors: number of sectors
     :param vSectors: vector containing sector's names
     :return:
-        mIPL: matrix containing all of the pure indexes (backwards, forwards and total)
-        IPLNorm: matrix containing all of the normalized indexes (mIPL divided by the the indicator's mean)
+        mIPL: matrix containing all the pure indexes (backwards, forwards and total)
+        IPLNorm: matrix containing all the normalized indexes (mIPL divided by the indicator's mean)
     """
 
     ## Creating array to store the components
@@ -920,7 +920,7 @@ def influence_matrix(mA, nIncrement, nSectors):
 
 def extraction(mA, mA_supply, vProduction, vFinalDemand, mSP, vSectors, nSectors):
     """
-    Calculates extraction coefficients for each sector (backward and forward looking)
+    Calculates extraction coefficients for each sector (backward and forward-looking)
     :param mA: direct technical coefficient's matrix
     :param mA_supply: leontief's matrix (supply-side model)
     :param vProduction: production vector
@@ -1128,7 +1128,7 @@ def write_data_excel(sDirectory, sFileName, vSheetName, vDataSheet):
     :return: Nothing; an Excel file is written in the "Output" directory.
     """
 
-    ## Creating Writer object (allows to write multiple sheets into a single file)
+    ## Creating Writer object (allows writing of multiple sheets into a single file)
     Writer = pd.ExcelWriter(sDirectory + sFileName, engine='openpyxl')
     # Lists to store dataframe
     lDataFrames = []
