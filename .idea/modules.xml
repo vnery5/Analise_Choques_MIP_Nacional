@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/Dados-IP-R.iml" filepath="$PROJECT_DIR$/.idea/Dados-IP-R.iml" />
-      <module fileurl="file://$PROJECT_DIR$/../EstimaMIPRegional_v1/.idea/EstimaMIPRegional_v1.iml" filepath="$PROJECT_DIR$/../EstimaMIPRegional_v1/.idea/EstimaMIPRegional_v1.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/Analise_Indicadores_Choques.iml" filepath="$PROJECT_DIR$/.idea/Analise_Indicadores_Choques.iml" />
     </modules>
   </component>
 </project>

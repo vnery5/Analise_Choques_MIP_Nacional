@@ -41,10 +41,10 @@ if __name__ == '__main__':
 
     ## Defining shock file parameters (remember that they have to have the same number of sectors as the estimated MIP)
     sFileShock = "Choque.xlsx"
-    sFileShock = "AgregRevisão.xlsx"
+    # sFileShock = "AgregRevisão.xlsx"
     sSheetDemandShock = "Demanda"
     sSheetSupplyShock = "Oferta"
-    sSheetDemandShock = sSheetSupplyShock = "ChoqueExp"
+    # sSheetDemandShock = sSheetSupplyShock = "ChoqueExp"
 
     ### Aggregate results?
     ## Remember that a sheet with the same number of sectors as the estimated mip has to be selected!
@@ -98,7 +98,7 @@ if __name__ == '__main__':
     sPathMIP = "./Input/"
     sAPF = "" if bGuilhoto else "_Patieene"
     sFileNameMIP = f"MIP_{nYear}_{nSectorsFile}{sAPF}.xlsx"
-    sFileNameMIP = "AgregRevisão.xlsx"
+    # sFileNameMIP = "AgregRevisão.xlsx"
 
     # Joining path and file name
     sFileMIP = sPathMIP + sFileNameMIP
